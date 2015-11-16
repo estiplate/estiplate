@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Estiplate</string>
+    <string name="action_settings">Settings</string>
+    <string name="password_hint">Password</string>
+    <string name="username_hint">Username</string>
+    <string name="login">Login</string>
+</resources>

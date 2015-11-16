@@ -1,0 +1,53 @@
+<html>
+<head>
+<link href='https://fonts.googleapis.com/css?family=Varela+Round'
+	rel='stylesheet' type='text/css'>
+<link rel="stylesheet" type="text/css" href="/helpings/feed.css">
+<script type="text/javascript" charset="utf-8" src="/helpings/feed.js"></script>
+</head>
+<body>
+
+	<div class="pagetitle">ESTIPLATE</div>
+	<p>
+	<div class="post" id="templatepost" style="display: none;">
+		<img src="" class="foodThumb" id="beforethumb"> <span
+			class="posttitle" id="title"></span><br> <span class="userlabel">Posted
+			by </span><a class="username" id="username"></a> at <span class="date"
+			id="date"></span><br> <span class="posttitle" id="calories"
+			style="display: none;"></span> <span class="posttitle" id="guess"
+			style="display: none;"></span>
+		<p>
+		<form class="calorieform" id="calform"
+			onsubmit="return sendGuess(this)">
+			<input type="text" name="calories" placeholder="?????"> <input
+				type="submit" value="Guess Calories">
+		</form>
+	</div>
+	<div id="sidebar">
+		<div id="loggedin" style="display: none;">
+			<form action="upload">
+				<h3 id="loggedinuser"></h3>
+				<a href="javascript:void(0)" id="logout" onclick="logout()">Logout</a>
+				<input type="submit" value="Upload Plate" id="postbutton">
+			</form>
+		</div>
+		<div id="loggedout" style="display: none;">
+			<h2 id="loginheader">Sign Up</h2>
+			<form name="userForm" onsubmit="return userAction()">
+				<input class="loginform" type="text" name="username"
+					placeholder="Username"> <br> <br> <input
+					class="loginform" type="password" name="password"
+					placeholder="Password"> <br> <br> <input
+					class="loginform" type="submit" name="send" id="submitbutton"
+					value="Register" />
+			</form>
+			<br> <a href="javascript:void(0)" id="toggleLoginButton"
+				onclick="toggleLogin()">Log In</a>
+			<div id="message" style="display: none">
+				<h3 id="messageText"></h3>
+			</div>
+		</div>
+	</div>
+	<p>
+</body>
+<html>
