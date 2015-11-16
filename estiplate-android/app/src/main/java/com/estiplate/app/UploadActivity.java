@@ -1,7 +1,9 @@
 package com.estiplate.app;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -175,6 +177,21 @@ public class UploadActivity extends Activity {
         }
         if (status == HttpURLConnection.HTTP_OK) {
             mHttpConnection.disconnect();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(UploadActivity.this);
+                    builder.setMessage("Success!");
+                    builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            finish();
+                        }
+                    });
+                    builder.show();
+                }
+            });
         } else {
             for (String line : response) {
                 System.out.println(line);
