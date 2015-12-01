@@ -33,7 +33,7 @@ public class UploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int THUMB_HEIGHT = 200;
+	private static final int THUMB_HEIGHT = 400;
 	static final String UPLOAD_PATH = "/var/www/uploads/";
 	private HelpingsDatabase mDatabase;
 
@@ -103,7 +103,7 @@ public class UploadServlet extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
 		BufferedImage img = null;
 		try {
 			img = ImageIO.read(new File(UPLOAD_PATH + filename));
@@ -111,12 +111,17 @@ public class UploadServlet extends HttpServlet {
 			File outputfile = new File(UPLOAD_PATH + "thumb" + filename);
 			ImageIO.write(thumb, "png", outputfile);
 		} catch (IOException e) {
+			PrintWriter out = response.getWriter();
+			out.println("WRONG! " + e.getMessage());
+			out.flush();
+			return;
 		}
 
 		// FIXME this needs to come *before* we do the file upload
 		boolean success = false;
+		String name = "";
 		if (token != null && token.length() > 0) {
-			String name = mDatabase.getUserForToken(token);
+			name = mDatabase.getUserForToken(token);
 			if (name != null && name.length() > 0) {
 				if (name.equals(username)) {
 					success = true;
@@ -124,16 +129,22 @@ public class UploadServlet extends HttpServlet {
 			}
 		}
 		if (!success) {
-			response.sendError(401);
+			PrintWriter out = response.getWriter();
+			out.println("WRONG! " + name + " " + token);
+			out.flush();
 			return;
 		}
 
+		int result = 0;
 		try {
-			mDatabase.createPost(username, title, filename, "", date.getTime());
+			result = mDatabase.createPost(username, title, filename, "", date.getTime());
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		// We could send the result back here somehow?
+
 		response.sendRedirect("feed");
 	}
 

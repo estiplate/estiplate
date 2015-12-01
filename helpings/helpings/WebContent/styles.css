@@ -98,7 +98,7 @@ input[type=submit]:active,input[type=button]:active {
 	top: 1px;
 }
 
-input[type=text],input[type=password] {
+input[type=text],input[type=password], input[type=email] {
 	margin: 0px;
 	text-align: left;
 }
@@ -117,10 +117,6 @@ input[type=text],input[type=password] {
     margin-left: 50px;
     margin-top: 50px;
     height: 200px
-}
-
-.username, .posttitle {
-	margin-left: 50px;
 }
 
 .foodThumb {

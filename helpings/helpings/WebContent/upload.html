@@ -5,7 +5,7 @@
 <meta name="viewport"
 	content="width=device-width, initial-scale=1.0, user-scalable=no" />
 <link rel="stylesheet" type="text/css" href="styles.css">
-<script type="text/javascript" charset="utf-8" src="login.js"></script>
+<script type="text/javascript" charset="utf-8" src="/helpings/utils.js"></script>
 <script type="text/javascript">
 
 window.onload = function() {
@@ -15,6 +15,10 @@ window.onload = function() {
 	document.getElementById('get_file').onclick = function() {
 	    document.getElementById('uploadinput').click();
 	};
+	var token = getCookie("token");
+	if (token == undefined || token == "") {
+		window.location = "/helpings/";
+	}
 }
 
 function readURL(input) {
@@ -35,6 +39,7 @@ function readURL(input) {
 <br>
 <br>
 <form action="upload" method="post" enctype="multipart/form-data" id="upload-form">
+<input type="file" name="file" size="50" id="uploadinput" onchange="readURL(this);"/>
 <br>
 <img id="preview" src="upload.png" alt="your image"/> <br> <br>
 <input type="button" id="get_file" value="Select Image"> <br> <br>

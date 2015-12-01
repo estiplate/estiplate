@@ -17,7 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @WebServlet(urlPatterns="/user", asyncSupported = true)
-public class HelpingsServlet extends HttpServlet {
+public class UserServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,7 +26,7 @@ public class HelpingsServlet extends HttpServlet {
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		mDatabase = new HelpingsDatabase();
+			mDatabase = new HelpingsDatabase();
 		try {
 			mDatabase.init();
 		} catch (ClassNotFoundException e) {
@@ -40,8 +40,9 @@ public class HelpingsServlet extends HttpServlet {
 		String token = null;
 		String username = (String) requestJSON.optString("username");
 		String password = (String) requestJSON.optString("password");
+		String email = (String) requestJSON.optString("email");
 		try {
-			token = mDatabase.createNewUser(username, password);
+			token = mDatabase.createNewUser(username, email, password);
 		} catch (NoSuchAlgorithmException e){
 		}
 		if ( token == null ) {
@@ -53,16 +54,16 @@ public class HelpingsServlet extends HttpServlet {
 	}
 
 	private void handleLogin(JSONObject requestJSON, HttpServletResponse response) throws IOException{
-		String username = (String) requestJSON.optString("username");
+		String email = (String) requestJSON.optString("email");
 		String password = (String) requestJSON.optString("password");
 		try {
-			User p = mDatabase.login(username, password);
+			User p = mDatabase.login(email, password);
 			if ( p != null && p.token != null){
 				PrintWriter out = response.getWriter();
 				try {
 					JSONObject responseObject = new JSONObject();
 					responseObject.put("token", p.token);
-					responseObject.put("best", p.score);
+					responseObject.put("username", p.name);
 					out.write(responseObject.toString());
 				} catch (JSONException  e){
 				}
@@ -74,7 +75,6 @@ public class HelpingsServlet extends HttpServlet {
 		} catch (NoSuchAlgorithmException e){
 
 		}
-
 	}
 
 	private void handleRequestToken(JSONObject requestJSON, HttpServletResponse response) throws IOException{

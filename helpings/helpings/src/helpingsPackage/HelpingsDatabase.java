@@ -13,17 +13,15 @@ import java.util.ArrayList;
 
 public class HelpingsDatabase
 {
-	static final String CREATE_USER_TABLE = "create table if not exists users (username string, salt string, hash string, token string, wins int, losses int, ties int, highscore int)";
-	static final String CREATE_USER = "insert into users (username,salt,hash,token,wins, losses, ties, highscore) values (?,?,?,?,?,?,?,?)";
+	static final String CREATE_USER_TABLE = "create table if not exists users (username string, email string, salt string, hash string, token string)";
+	static final String CREATE_USER = "insert into users (username,email,salt,hash,token) values (?,?,?,?,?)";
 	static final String GET_USER = "select * from users where username=?";
+	static final String GET_USER_BY_EMAIL = "select * from users where email=?";
 	static final String GET_USER_BY_TOKEN = "select * from users where token=?";
-	static final String GET_USERS_BY_SCORE = "select * from users ORDER BY wins - losses DESC";
-	static final String GET_USERS_BY_HIGH_SCORE = "select * from users ORDER BY highscore ASC";
-	static final String UPDATE_USER_TOKEN = "update users set token=? where username=?";
-	static final String UPDATE_RECORD = "update users set wins=?,losses=?,ties=? where username=?";
-	static final String UPDATE_HIGH_SCORE = "update users set highscore=? where username=?";
+	static final String UPDATE_USER_TOKEN = "update users set token=? where email=?";
 	static final String CREATE_POST_TABLE = "create table if not exists posts (username string, title string, beforeimage string, afterimage string, calories int, guesses int, date int)";
 	static final String CREATE_POST = "insert into posts (username, title, beforeimage, afterimage, calories, guesses, date) values (?,?,?,?,?,?,?)";
+	static final String LAST_POST = "select last_insert_rowid() from posts";
 	static final String GET_POSTS_IN_RANGE = "select rowid, username, title, beforeimage, afterimage, date from posts order by rowid desc limit ? offset ?;";
 	static final String GET_USER_POSTS_IN_RANGE = "select rowid, username, title, beforeimage, afterimage, date from posts where username=? order by rowid desc limit ? offset ?;";
 	static final String CREATE_GUESS_TABLE = "create table if not exists guesses (post int, username string, calories int)";
@@ -88,22 +86,22 @@ public class HelpingsDatabase
 		return false;
 	}
 
-	public User login(String username, String password) throws NoSuchAlgorithmException{
+	public User login(String email, String password) throws NoSuchAlgorithmException{
 
 		Connection connection = null;
 		try
 		{
 			// create a database connection
 			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
-			PreparedStatement statement = connection.prepareStatement(GET_USER);
+			PreparedStatement statement = connection.prepareStatement(GET_USER_BY_EMAIL);
 			statement.setQueryTimeout(30);  // set timeout to 30 sec.
-			statement.setString(1, username);
+			statement.setString(1, email);
 			ResultSet rs = statement.executeQuery();
 			if(rs.next())
 			{
 				String hash = rs.getString("hash");
 				String salt = rs.getString("salt");
-				int highScore = rs.getInt("highscore");
+				String name = rs.getString("username");
 
 				String calculatedHash = get_SHA_1_SecurePassword(salt,password);
 				if ( calculatedHash != null && calculatedHash.equals(hash) ) {
@@ -111,12 +109,12 @@ public class HelpingsDatabase
 					statement = connection.prepareStatement(UPDATE_USER_TOKEN);
 					statement.setQueryTimeout(30);  // set timeout to 30 sec.
 					statement.setString(1, token);
-					statement.setString(2, username);
+					statement.setString(2, email);
 					statement.executeUpdate();
 					User user = new User();
-					user.name = username;
+					user.email = email;
 					user.token = token;
-					user.score = highScore;
+					user.name = name;
 					return user;
 				} 
 			}	
@@ -132,7 +130,7 @@ public class HelpingsDatabase
 		return null;
 	}
 
-	public String createNewUser(String username, String password) throws NoSuchAlgorithmException{
+	public String createNewUser(String username, String email, String password) throws NoSuchAlgorithmException{
 
 		String salt = getSalt();
 		String token = getSalt();
@@ -151,16 +149,21 @@ public class HelpingsDatabase
 				return null;
 			}
 
+			statement = connection.prepareStatement(GET_USER_BY_EMAIL);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			statement.setString(1, username);
+			rs = statement.executeQuery();
+			if( rs.next() ){
+				return null;
+			}	
+			
 			statement = connection.prepareStatement(CREATE_USER);
 			statement.setQueryTimeout(30);  // set timeout to 30 sec.
 			statement.setString(1, username);
-			statement.setString(2, salt);
-			statement.setString(3, hash);
-			statement.setString(4, token);
-			statement.setInt(5, 0);
-			statement.setInt(6, 0);
-			statement.setInt(7, 0);
-			statement.setInt(8, -1);
+			statement.setString(2, email);
+			statement.setString(3, salt);
+			statement.setString(4, hash);
+			statement.setString(5, token);
 			statement.executeUpdate();
 		}
 		catch(SQLException e)
@@ -175,7 +178,9 @@ public class HelpingsDatabase
 		return token;
 	}
 
-	public void createPost(String username, String title, String beforeimage, String afterimage, long date) throws NoSuchAlgorithmException{
+	public int createPost(String username, String title, String beforeimage, String afterimage, long date) throws NoSuchAlgorithmException{
+
+		int result = 0;
 
 		Connection connection = null;
 		try
@@ -194,16 +199,23 @@ public class HelpingsDatabase
 			statement.setLong(7, date);
 
 			statement.executeUpdate();
+
+			statement = connection.prepareStatement(LAST_POST);
+			ResultSet rs = statement.executeQuery();
+			if ( rs.next() )  {
+				result = rs.getInt("last_insert_rowid()");
+			}
 		}
 		catch(SQLException e)
 		{
 			System.err.println(e.getMessage());
-			return;
 		}
 		finally
 		{
 			closeConnection(connection);
 		}
+		return result;
+
 	}
 
 	public ArrayList<Post> getPostsInRange(int offset, int limit) throws NoSuchAlgorithmException{
