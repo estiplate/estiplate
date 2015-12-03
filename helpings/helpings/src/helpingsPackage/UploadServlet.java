@@ -33,7 +33,7 @@ public class UploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int THUMB_HEIGHT = 400;
+	private static final int THUMB_WIDTH = 400;
 	static final String UPLOAD_PATH = "/var/www/uploads/";
 	private HelpingsDatabase mDatabase;
 
@@ -158,9 +158,9 @@ public class UploadServlet extends HttpServlet {
 	BufferedImage createResizedCopy(Image originalImage) {
 		float width = originalImage.getWidth(null);
 		float height = originalImage.getHeight(null);
-		int scaledHeight = THUMB_HEIGHT;
-		float scale = ((float) scaledHeight) / height;
-		int scaledWidth = (int) (width * scale);
+		int scaledWidth = THUMB_WIDTH;
+		float scale = ((float) scaledWidth) / width;
+		int scaledHeight = (int) (height * scale);
 		int imageType = BufferedImage.TYPE_INT_ARGB;
 		BufferedImage scaledBI = new BufferedImage(scaledWidth, scaledHeight,
 				imageType);

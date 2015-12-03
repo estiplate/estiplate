@@ -7,15 +7,25 @@ var gToken = "";
 
 window.onload = function() {
 	sendFeedRequest();
-	gUsername = getCookie("username");
-	gToken = getCookie("token");
 }
 
 function logout() {
 	setCookie("token", "");
-	document.getElementById("loggedin").style.display = 'none';
-	document.getElementById("loggedout").style.display = 'block';
 	window.location = "/helpings/";
+}
+
+function nextPage() {
+	var url = window.location.href;
+	var lastSlash = url.lastIndexOf('/');
+	var lastSegment = url.substring(lastSlash + 1, url.length);
+	if ( !isNaN(lastSegment) ) {
+		var nextPage = parseInt(lastSegment) + 1;
+		var base = url.substring(0,lastSlash);
+		window.location = base + "/" +  nextPage;
+	} else {
+		window.location = window.location.href + "/2";
+	}
+	
 }
 
 function addNewPost(postInfo) {
@@ -43,7 +53,7 @@ function addNewPost(postInfo) {
 			child.id = child.id + "_" + post.rowid;
 		}
 	}
-	document.body.appendChild(newpost);
+	document.getElementById("posts").appendChild(newpost);
 	if (postInfo.userguess != undefined && postInfo.userguess > 0) {
 		document.getElementById("calories_" + post.rowid).innerHTML = "Average: "
 				+ postInfo.average;
@@ -57,6 +67,8 @@ function addNewPost(postInfo) {
 
 function sendFeedRequest() {
 
+	gUsername = getCookie("username");
+	gToken = getCookie("token");
 	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
 		xmlhttp = new XMLHttpRequest();
 	} else {// code for IE6, IE5
@@ -136,7 +148,7 @@ function sendGuess(input) {
 	params.token = getCookie("token");
 	var paramString = JSON.stringify(params);
 
-	xmlhttp.open("POST", "guess", true);
+	xmlhttp.open("POST", "/helpings/guess", true);
 	xmlhttp.onreadystatechange = handleGuessResponse;
 
 	// Send the proper header information along with the request

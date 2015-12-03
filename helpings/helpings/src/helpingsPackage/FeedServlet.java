@@ -15,13 +15,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-@WebServlet(urlPatterns = {"/feed", "/users/*"}, asyncSupported = true)
+@WebServlet(urlPatterns = {"/feed/*", "/users/*"}, asyncSupported = true)
 public class FeedServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
 	private HelpingsDatabase mDatabase;
 	private static final String FILTER_USERS = "users";
+	private static final String FILTER_FEED = "feed";
+	private static final String HELPINGS_PREFIX = "/helpings";
+	private static final int PLATES_PER_PAGE = 20;
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
@@ -39,17 +42,33 @@ public class FeedServlet extends HttpServlet {
 					throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
 		String uri = request.getRequestURI();
-		int secondSlash = uri.indexOf('/', 1);
-		int thirdSlash = uri.lastIndexOf('/');
+		if( uri.startsWith( HELPINGS_PREFIX ) ) {
+			uri = uri.substring(HELPINGS_PREFIX.length() , uri.length());
+		}
+		String[] pathSegments = uri.split("/");
 		String filter = "";
 		String filterParam = "";
-		if ( secondSlash != thirdSlash ) {
-			filter = uri.substring(secondSlash + 1, thirdSlash);
-			filterParam = uri.substring(thirdSlash + 1, uri.length());
+		int page = 0;
+		if ( pathSegments.length > 1 ) {
+			filter = pathSegments[1];
+			if ( filter.equals(FILTER_FEED) ) {
+				if ( pathSegments.length > 2 ) {
+					String pageString = pathSegments[2];
+					page = Integer.parseInt(pageString);
+				}
+			} else {
+				if ( pathSegments.length > 2 ) {
+					filterParam = pathSegments[2];
+				}
+				if ( pathSegments.length > 3 ) {
+					String pageString = pathSegments[3];
+					page = Integer.parseInt(pageString);
+				}
+			}
 		}
 		Map<String, String[]>params = request.getParameterMap();
-		int offset = 0;
-		int limit = 20;
+		int offset = page * PLATES_PER_PAGE;
+		int limit = PLATES_PER_PAGE;
 		boolean json = false;
 		String username = null;
 		String token = null;
