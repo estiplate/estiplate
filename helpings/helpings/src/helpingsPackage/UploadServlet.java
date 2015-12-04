@@ -1,8 +1,11 @@
 package helpingsPackage;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +30,14 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.output.*;
+
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.jpeg.JpegDirectory;
 
 @WebServlet(urlPatterns = "/upload")
 public class UploadServlet extends HttpServlet {
@@ -66,13 +77,13 @@ public class UploadServlet extends HttpServlet {
 
 		}
 		String filename = Long.toString(date.getTime()) + salt + ".png";
-/*
+		/*
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				request.getInputStream()));
 		for (String line; (line = reader.readLine()) != null;) {
 			System.out.println(line);
 		}
-*/
+		 */
 		// Create a new file upload handler
 		ServletFileUpload upload = new ServletFileUpload(factory);
 
@@ -103,11 +114,14 @@ public class UploadServlet extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
+		File imagefile = new File(UPLOAD_PATH + filename);
+		int rotation = getRotation(imagefile);
+
 		BufferedImage img = null;
 		try {
-			img = ImageIO.read(new File(UPLOAD_PATH + filename));
-			BufferedImage thumb = createResizedCopy(img);
+			img = ImageIO.read(imagefile);
+			BufferedImage thumb = fixRotationAndScale(img, rotation);
 			File outputfile = new File(UPLOAD_PATH + "thumb" + filename);
 			ImageIO.write(thumb, "png", outputfile);
 		} catch (IOException e) {
@@ -155,18 +169,89 @@ public class UploadServlet extends HttpServlet {
 		view.forward(request, response);
 	}
 
-	BufferedImage createResizedCopy(Image originalImage) {
-		float width = originalImage.getWidth(null);
-		float height = originalImage.getHeight(null);
+	BufferedImage fixRotationAndScale(BufferedImage image, int orientation ){
+
+		float width = image.getWidth(null);
 		int scaledWidth = THUMB_WIDTH;
 		float scale = ((float) scaledWidth) / width;
-		int scaledHeight = (int) (height * scale);
-		int imageType = BufferedImage.TYPE_INT_ARGB;
-		BufferedImage scaledBI = new BufferedImage(scaledWidth, scaledHeight,
-				imageType);
-		Graphics2D g = scaledBI.createGraphics();
-		g.drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null);
-		g.dispose();
-		return scaledBI;
+
+		AffineTransform transform = getExifTransformation(orientation, image.getHeight(), image.getWidth(), scale);
+	    AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BICUBIC);
+
+	    BufferedImage destinationImage = op.createCompatibleDestImage(image,  (image.getType() == BufferedImage.TYPE_BYTE_GRAY)? image.getColorModel() : null );
+	    Graphics2D g = destinationImage.createGraphics();
+	    g.setBackground(Color.WHITE);
+	    g.clearRect(0, 0, destinationImage.getWidth(), destinationImage.getHeight());
+	    destinationImage = op.filter(image, destinationImage);
+
+	    return destinationImage;
+	}
+
+	int getRotation(File imageFile){
+
+		int orientation = 1;
+
+		Metadata metadata;
+		try {
+			metadata = ImageMetadataReader.readMetadata(imageFile);
+		} catch (ImageProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return orientation;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return orientation;
+		}
+
+		Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+		try {
+			orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+		} catch (MetadataException me) {
+		}
+		return orientation;
+
+	}
+
+	public static AffineTransform getExifTransformation(int orientation, int height, int width, float scale) {
+
+	    AffineTransform t = new AffineTransform();
+
+	    switch (orientation) {
+	    case 1:
+	        break;
+	    case 2: // Flip X
+	        t.scale(-scale, scale);
+	        t.translate(-width, 0);
+	        break;
+	    case 3: // PI rotation 
+	        t.translate(width, height);
+	        t.rotate(Math.PI);
+	        break;
+	    case 4: // Flip Y
+	        t.scale(scale, -scale);
+	        t.translate(0, -height);
+	        break;
+	    case 5: // - PI/2 and Flip X
+	        t.rotate(-Math.PI / 2);
+	        t.scale(-scale, scale);
+	        break;
+	    case 6: // -PI/2 and -width
+	        t.translate(height, 0);
+	        t.rotate(Math.PI / 2);
+	        break;
+	    case 7: // PI/2 and Flip
+	        t.scale(-scale, scale);
+	        t.translate(-height, 0);
+	        t.translate(0, width);
+	        t.rotate(  3 * Math.PI / 2);
+	        break;
+	    case 8: // PI / 2
+	        t.translate(0, width);
+	        t.rotate(  3 * Math.PI / 2);
+	        break;
+	    }
+
+	    return t;
 	}
 }
