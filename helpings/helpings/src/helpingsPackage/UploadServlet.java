@@ -44,7 +44,7 @@ public class UploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int THUMB_WIDTH = 400;
+	private static final int THUMB_WIDTH = 600;
 	static final String UPLOAD_PATH = "/var/www/uploads/";
 	private HelpingsDatabase mDatabase;
 
@@ -171,11 +171,7 @@ public class UploadServlet extends HttpServlet {
 
 	BufferedImage fixRotationAndScale(BufferedImage image, int orientation ){
 
-		float width = image.getWidth(null);
-		int scaledWidth = THUMB_WIDTH;
-		float scale = ((float) scaledWidth) / width;
-
-		AffineTransform transform = getExifTransformation(orientation, image.getHeight(), image.getWidth(), scale);
+		AffineTransform transform = getExifTransformation(orientation, image.getHeight(), image.getWidth());
 	    AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BICUBIC);
 
 	    BufferedImage destinationImage = op.createCompatibleDestImage(image,  (image.getType() == BufferedImage.TYPE_BYTE_GRAY)? image.getColorModel() : null );
@@ -184,6 +180,27 @@ public class UploadServlet extends HttpServlet {
 	    g.clearRect(0, 0, destinationImage.getWidth(), destinationImage.getHeight());
 	    destinationImage = op.filter(image, destinationImage);
 
+	    return scale(destinationImage);
+	}
+
+	public static BufferedImage scale(BufferedImage image) {
+
+		float width = image.getWidth(null);
+		float height = image.getHeight(null);
+		int dWidth = THUMB_WIDTH;
+		float scale = ((float) dWidth) / width;
+		int dHeight = (int) (height * scale);
+
+		BufferedImage destinationImage = null;
+	    if(image != null) {
+	    	destinationImage = new BufferedImage(dWidth, dHeight, BufferedImage.TYPE_INT_ARGB);
+	        AffineTransform transform = AffineTransform.getScaleInstance(scale, scale);
+		    AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BICUBIC);
+		    Graphics2D g = destinationImage.createGraphics();
+		    g.setBackground(Color.WHITE);
+		    g.clearRect(0, 0, destinationImage.getWidth(), destinationImage.getHeight());
+		    destinationImage = op.filter(image, destinationImage);
+	    }
 	    return destinationImage;
 	}
 
@@ -205,6 +222,9 @@ public class UploadServlet extends HttpServlet {
 		}
 
 		Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+		if ( directory == null ) {
+			return orientation;
+		}
 		try {
 			orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
 		} catch (MetadataException me) {
@@ -213,7 +233,7 @@ public class UploadServlet extends HttpServlet {
 
 	}
 
-	public static AffineTransform getExifTransformation(int orientation, int height, int width, float scale) {
+	public static AffineTransform getExifTransformation(int orientation, int height, int width) {
 
 	    AffineTransform t = new AffineTransform();
 
@@ -221,7 +241,7 @@ public class UploadServlet extends HttpServlet {
 	    case 1:
 	        break;
 	    case 2: // Flip X
-	        t.scale(-scale, scale);
+	        t.scale(-1.0, 1.0);
 	        t.translate(-width, 0);
 	        break;
 	    case 3: // PI rotation 
@@ -229,19 +249,19 @@ public class UploadServlet extends HttpServlet {
 	        t.rotate(Math.PI);
 	        break;
 	    case 4: // Flip Y
-	        t.scale(scale, -scale);
+	        t.scale(1.0, -1.0);
 	        t.translate(0, -height);
 	        break;
 	    case 5: // - PI/2 and Flip X
 	        t.rotate(-Math.PI / 2);
-	        t.scale(-scale, scale);
+	        t.scale(-1.0, 1.0);
 	        break;
 	    case 6: // -PI/2 and -width
 	        t.translate(height, 0);
 	        t.rotate(Math.PI / 2);
 	        break;
 	    case 7: // PI/2 and Flip
-	        t.scale(-scale, scale);
+	        t.scale(-1.0, 1.0);
 	        t.translate(-height, 0);
 	        t.translate(0, width);
 	        t.rotate(  3 * Math.PI / 2);
