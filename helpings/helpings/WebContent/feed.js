@@ -6,6 +6,11 @@ var gUsername = "";
 var gToken = "";
 
 window.onload = function() {
+
+	gToken = getCookie("token");
+	if ( gToken == undefined || gToken.length == 0) {
+		document.getElementById("postbutton").value = "Login";
+	}
 	sendFeedRequest();
 }
 
@@ -48,20 +53,58 @@ function addNewPost(postInfo) {
 	var children = newpost.children;
 	for (var i = 0; i < children.length; i++) {
 		var child = children[i];
-		console.log("child.id = " + child.id);
 		if (child.id != "") {
 			child.id = child.id + "_" + post.rowid;
+		}
+		if (child.form != "") {
+			child.form = child.form + "_" + post.rowid;
 		}
 	}
 	document.getElementById("posts").appendChild(newpost);
 	if (postInfo.userguess != undefined && postInfo.userguess > 0) {
 		document.getElementById("calories_" + post.rowid).innerHTML = "Average: "
 				+ postInfo.average;
-		document.getElementById("guess_" + post.rowid).style.display = 'block';
-		document.getElementById("calories_" + post.rowid).style.display = 'block';
 		document.getElementById("guess_" + post.rowid).innerHTML = "Your Guess: "
 				+ postInfo.userguess;
-		document.getElementById("calform_" + post.rowid).style.display = 'none';
+		showGuess(post.rowid, true);
+		showGuessInput(post.rowid, false);
+		addComments( postInfo.comments, post.rowid);
+	} else {
+		if ( gToken == undefined || gToken.length == 0) { 
+			showGuessInput(post.rowid, false);
+		}
+		showComments(post.rowid, false);
+		showGuess(post.rowid, false);
+	}
+}
+
+function showComments(post, show) {
+	if ( !show ) {
+		document.getElementById("comments_" + post).style.display = 'none';
+		document.getElementById("commentinput_" + post).style.display = 'none';
+		document.getElementById("commentbutton_" + post).style.display = 'none';
+	} else {
+		document.getElementById("comments_" + post).style.display = '';
+		document.getElementById("commentinput_" + post).style.display = '';
+		document.getElementById("commentbutton_" + post).style.display = '';
+	}
+}
+
+function showGuessInput(post, show) {
+	if ( !show ) {
+		document.getElementById("calform_" + post).style.display = 'none';
+	} else {
+		document.getElementById("calform_" + post).style.display = '';
+	}
+}
+
+function showGuess(post, show) {
+	if ( !show ) {
+		document.getElementById("calories_" + post).style.display = 'none';
+		document.getElementById("guess_" + post).style.display = 'none';
+	} else {
+		document.getElementById("calories_" + post).style.display = 'block';
+		document.getElementById("guess_" + post).style.display = 'block';
 	}
 }
 
@@ -179,11 +222,103 @@ function handleGuessResponse() {
 		var post = jsonResp.post;
 		document.getElementById("calories_" + post).innerHTML = "Average: "
 				+ jsonResp.calories;
-		document.getElementById("guess_" + post).style.display = 'block';
-		document.getElementById("calories_" + post).style.display = 'block';
+		showGuess(post, true);
+		showGuessInput(post, false);
+		showComments(post, true);
+
+		addComments(jsonResp.comments, post);
 		gResponsePtr = len;
 
 	} else if (xmlhttp.readyState == 4) {
 		gResponsePtr = 0;
 	}
+}
+
+function postComment(button) {
+
+	var post_id = button.id.split("_")[1];
+	var input = document.getElementById("commentinput_" + post_id);
+	var comment = input.value;
+	input.value = "";
+
+	if ( comment.length == 0 ) {
+		alert("Comment field is empty");
+	}
+	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+		xmlhttp = new XMLHttpRequest();
+	} else {// code for IE6, IE5
+		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+
+	var params = new Object();
+	params.post = post_id;
+	params.username = getCookie("username");
+	params.token = getCookie("token");
+	params.comment = comment;
+	var paramString = JSON.stringify(params);
+
+	xmlhttp.open("POST", "/helpings/comment", true);
+	xmlhttp.onreadystatechange = handleCommentResponse;
+
+	// Send the proper header information along with the request
+	xmlhttp.setRequestHeader("Content-type",
+			"application/x-www-form-urlencoded");
+	xmlhttp.send(paramString);
+	console.log(paramString);
+	return false;
+}
+
+function handleCommentResponse() {
+	var len = xmlhttp.responseText.length;
+	var xmlResp = xmlhttp.responseText.substring(gResponsePtr, len);
+
+	if (xmlhttp.readyState == 3) {
+
+		// Success! Reset retries
+		gRetryCount = 0;
+
+		// This is really kind of ugly. We keep feeding more data in and seeing
+		// if it parses sucessfully. When it does, we know we have a complete
+		// command
+		var jsonResp = JSON.parse(xmlResp);
+		if (jsonResp == null) {
+			return;
+		}
+		console.log(jsonResp);
+		var postId = jsonResp.postId;
+		var commentList = jsonResp.comments;
+		if ( commentList != null ) {
+			addComments(commentList, postId);
+		}
+		gResponsePtr = len;
+
+	} else if (xmlhttp.readyState == 4) {
+		gResponsePtr = 0;
+	}
+}
+
+function addComments( commentList, postId ) {
+	console.log(commentList);
+	if ( commentList == null ) {
+		return;
+	}
+	var commentWrapper = document.getElementById("comments_" + postId);
+	for (var i = 0; i < commentList.length; i++) {
+		var comment = commentList[i];
+		addComment(commentWrapper, comment);
+		console.log(comment);
+	}
+}
+
+function addComment( commentWrapper, comment ) {
+	var template = document.getElementById("templatecomment");
+	var newcomment = template.cloneNode(true);
+	newcomment.querySelector("#commenttext").innerHTML = comment.comment;
+	newcomment.querySelector("#commentmetadata").innerHTML = comment.username + " at " +  timeConverter(comment.date);
+	newcomment.style.display = "";
+	commentWrapper.appendChild(newcomment);
+}
+
+function getMoreComments( link ) {
+	console.log(link.id);
 }

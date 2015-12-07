@@ -11,6 +11,7 @@ import javax.servlet.*;
 import javax.servlet.annotation.*;
 import javax.servlet.http.*;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,6 +30,14 @@ public class GuessServlet extends HttpServlet {
 		} catch (ClassNotFoundException e) {
 
 		}
+	}
+
+	@Override
+	public void doGet(HttpServletRequest request,
+			HttpServletResponse response)
+					throws ServletException, IOException {
+		PrintWriter out = response.getWriter();
+		out.println(request.getRequestURI());
 	}
 
 	@Override
@@ -86,6 +95,12 @@ public class GuessServlet extends HttpServlet {
 		try {
 			obj.put("post", post);
 			obj.put("calories", cals);
+			ArrayList<Comment>comments = mDatabase.getCommentsForPost(post, 0, 100); // FIXME
+			JSONArray commentsJson = new JSONArray();
+			for( Comment comment: comments ){
+				commentsJson.put(comment.toJson());
+			}
+			obj.put("comments", commentsJson);
 
 		} catch (JSONException e){}
 		String errorString = obj.toString();

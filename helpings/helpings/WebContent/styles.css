@@ -124,3 +124,7 @@ input[type=text],input[type=password], input[type=email] {
     max-height: 200px;
     float: left;
 }
+
+img {
+    image-orientation: from-image;
+}

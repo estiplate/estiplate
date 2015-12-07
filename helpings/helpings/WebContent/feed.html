@@ -19,9 +19,9 @@
 		<img src="" class="foodThumb" id="beforethumb"> <br> <span
 			class="posttitle" id="title"> </span> <br> <span
 			class="userlabel">Posted by </span><a class="username" id="username"></a>
-		at <span class="date" id="date"></span> <br> <br> <span
-			class="posttitle" id="calories" style="display: none;"></span> <span
-			class="posttitle" id="guess" style="display: none;"></span>
+		at <span class="date" id="date"></span> 
+		<span class="posttitle" id="calories"></span>
+		<span class="posttitle" id="guess"></span>
 		<form class="calorieform" id="calform"
 			onsubmit="return sendGuess(this)">
 			<input type="number" name="calories" placeholder="Enter Estimate"
@@ -29,11 +29,20 @@
 				style="float: left; width: 200px; margin-right: 25px;"> <input
 				type="submit" value="Enter" style="float: left; width: 100px;"><br>
 		</form>
-		<br>
+		<div class="comments_wrapper"  style="margin-top: 10px;" id="comments"></div>
+		<textarea id="commentinput" style="width: 100%; margin-top: 5px"></textarea>
+		<button id="commentbutton"
+			style="float: left; width: 250px; margin-top: 10px"
+			onclick="postComment(this)">Add Comment</button>
+	</div>
+	<div class="comment" id="templatecomment" style="display: none;">
+		<div class="comment_text" id="commenttext"></div>
+		<div class="comment_metadata" id="commentmetadata"></div>
 	</div>
 	<div id="posts"></div>
 	<p>
-	<a id="nextbutton" href="javascript:void(0)" onclick="nextPage();">Next</a>
-	<a id="logout" style="float: right; margin-right: 100px;" href="javascript:void(0)" onclick="logout();">Logout</a>
+		<a id="nextbutton" href="javascript:void(0)" onclick="nextPage();">Next</a>
+		<a id="logout" style="float: right; margin-right: 100px;"
+			href="javascript:void(0)" onclick="logout();">Logout</a>
 </body>
 <html>

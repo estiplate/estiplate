@@ -25,6 +25,7 @@ public class FeedServlet extends HttpServlet {
 	private static final String FILTER_FEED = "feed";
 	private static final String HELPINGS_PREFIX = "/helpings";
 	private static final int PLATES_PER_PAGE = 20;
+	private static final int INITIAL_COMMENTS = 10;
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
@@ -120,6 +121,7 @@ public class FeedServlet extends HttpServlet {
 			if ( posts == null ) {
 				return;
 			} else {
+				ArrayList<Comment> comments = null;
 				JSONArray array = new JSONArray();
 				int count = 0;
 				for ( Post post: posts) {
@@ -129,6 +131,16 @@ public class FeedServlet extends HttpServlet {
 						postData.put( "average", guesses.get(count));
 						if ( userGuesses != null ) {
 							postData.put( "userguess", userGuesses.get(count));
+
+							// Only add the comments if the user has made a guess
+							if ( userGuesses.get(count) > 0 ) {
+								comments = mDatabase.getCommentsForPost(post.id, 0, INITIAL_COMMENTS);
+								JSONArray commentsJson = new JSONArray();
+								for( Comment comment: comments ){
+									commentsJson.put(comment.toJson());
+								}
+								postData.put("comments", commentsJson);
+							}
 						}
 						array.put(postData);
 					} catch (JSONException e) {

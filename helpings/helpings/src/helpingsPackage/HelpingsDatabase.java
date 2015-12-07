@@ -29,7 +29,9 @@ public class HelpingsDatabase
 	static final String GET_GUESSES_FOR_POST = "select * from guesses where post=?";
 	static final String GET_AVERAGE_FOR_POST = "select avg(calories) from guesses where post=?;";
 	static final String GET_USER_GUESS_FOR_POST = "select calories from guesses where post=? and username=?;";
-
+	static final String CREATE_COMMENT_TABLE = "create table if not exists comments (post int, username string, comment string, date int)";
+	static final String CREATE_COMMENT = "insert into comments (post, username, comment, date) values (?,?,?,?)";
+	static final String GET_COMMENTS_FOR_POST = "select * from comments where post=? limit ? offset ?;";
 
 	static final String DATABASE_CONNECTION_STRING = "jdbc:sqlite:/var/www/helpings.db";
 
@@ -49,6 +51,7 @@ public class HelpingsDatabase
 			statement.executeUpdate(CREATE_USER_TABLE);
 			statement.executeUpdate(CREATE_POST_TABLE);
 			statement.executeUpdate(CREATE_GUESS_TABLE);
+			statement.executeUpdate(CREATE_COMMENT_TABLE);
 		}
 		catch(SQLException e)
 		{
@@ -102,15 +105,17 @@ public class HelpingsDatabase
 				String hash = rs.getString("hash");
 				String salt = rs.getString("salt");
 				String name = rs.getString("username");
+				String token = rs.getString("token");
 
 				String calculatedHash = get_SHA_1_SecurePassword(salt,password);
 				if ( calculatedHash != null && calculatedHash.equals(hash) ) {
-					String token = getSalt();
+					// Do we ever update the token?  When should we?
+/*					String token = getSalt();
 					statement = connection.prepareStatement(UPDATE_USER_TOKEN);
 					statement.setQueryTimeout(30);  // set timeout to 30 sec.
 					statement.setString(1, token);
 					statement.setString(2, email);
-					statement.executeUpdate();
+					statement.executeUpdate();*/
 					User user = new User();
 					user.email = email;
 					user.token = token;
@@ -306,9 +311,7 @@ public class HelpingsDatabase
 			// For now, nope.
 			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
 
-			PreparedStatement statement = connection.prepareStatement(GET_USER);
-
-			statement = connection.prepareStatement(CREATE_GUESS);
+			PreparedStatement statement = connection.prepareStatement(CREATE_GUESS);
 			statement.setQueryTimeout(30);  // set timeout to 30 sec.
 			statement.setLong(1, post);
 			statement.setString(2, username);
@@ -445,6 +448,64 @@ public class HelpingsDatabase
 			closeConnection(connection);
 		}
 		return null;
+	}
+
+	public void createComment(long post, String username, String comment, long date) throws NoSuchAlgorithmException{
+
+		Connection connection = null;
+		try
+		{
+			// In future, this should keep a user from guessing for the same post multiple times.
+			// For now, nope.
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+
+			PreparedStatement statement = connection.prepareStatement(CREATE_COMMENT);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			statement.setLong(1, post);
+			statement.setString(2, username);
+			statement.setString(3, comment);
+			statement.setLong(4, date);
+			statement.executeUpdate();
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+			return;
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+	}
+
+	public ArrayList<Comment> getCommentsForPost(long post, int offset, int limit) {
+
+		ArrayList<Comment> comments = new ArrayList<Comment>();
+
+		Connection connection = null;
+		try
+		{
+			// create a database connection
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+			PreparedStatement statement = connection.prepareStatement(GET_COMMENTS_FOR_POST);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			statement.setLong(1, post);
+			statement.setInt(2, limit);
+			statement.setInt(3, offset);
+			ResultSet rs = statement.executeQuery();
+			while( rs.next() ) {
+				comments.add( Comment.creatComment(rs) );
+			}	
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		return comments;
 	}
 
 	private void closeConnection(Connection connection){
