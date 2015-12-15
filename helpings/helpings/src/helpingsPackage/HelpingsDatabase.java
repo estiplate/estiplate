@@ -27,7 +27,7 @@ public class HelpingsDatabase
 	static final String CREATE_GUESS_TABLE = "create table if not exists guesses (post int, username string, calories int)";
 	static final String CREATE_GUESS = "insert into guesses (post, username, calories) values (?,?,?)";
 	static final String GET_GUESSES_FOR_POST = "select * from guesses where post=?";
-	static final String GET_AVERAGE_FOR_POST = "select avg(calories) from guesses where post=?;";
+	static final String GET_AVERAGE_FOR_POST = "select avg(calories), count(calories) from guesses where post=?;";
 	static final String GET_USER_GUESS_FOR_POST = "select calories from guesses where post=? and username=?;";
 	static final String CREATE_COMMENT_TABLE = "create table if not exists comments (post int, username string, comment string, date int)";
 	static final String CREATE_COMMENT = "insert into comments (post, username, comment, date) values (?,?,?,?)";
@@ -290,8 +290,8 @@ public class HelpingsDatabase
 
 	// We should store the averages in the table along with the post.  So much faster.
 	// Just need to synchronize properly.
-	public ArrayList<Integer> getAveragesForPosts(ArrayList<Post> posts){
-		ArrayList<Integer> averages = new ArrayList<Integer>();
+	public ArrayList<Average> getAveragesForPosts(ArrayList<Post> posts){
+		ArrayList<Average> averages = new ArrayList<Average>();
 		try {
 			for(Post post: posts) {
 				averages.add(getAverageGuessForPost(post.id));
@@ -329,7 +329,7 @@ public class HelpingsDatabase
 		}
 	}
 
-	public int getAverageGuessForPost(long post) throws NoSuchAlgorithmException{
+	public Average getAverageGuessForPost(long post) throws NoSuchAlgorithmException{
 
 		Connection connection = null;
 		try
@@ -341,7 +341,7 @@ public class HelpingsDatabase
 			statement.setLong(1, post);
 			ResultSet rs = statement.executeQuery();
 			while( rs.next() ) {
-				return rs.getInt("avg(calories)");
+				return new Average(rs.getInt("avg(calories)"), rs.getInt("count(calories)"));
 			}	
 		}
 		catch(SQLException e)
@@ -352,7 +352,7 @@ public class HelpingsDatabase
 		{
 			closeConnection(connection);
 		}
-		return 0;
+		return null;
 	}
 
 	public int getUserGuessForPost(long post, String username) throws NoSuchAlgorithmException{

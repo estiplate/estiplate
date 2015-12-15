@@ -151,6 +151,8 @@ public class UploadServlet extends HttpServlet {
 
 		int result = 0;
 		try {
+			// Strip html.  FIXME use Jsoup
+			title = title.replaceAll("\\<[^>]*>","");
 			result = mDatabase.createPost(username, title, filename, "", date.getTime());
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
@@ -171,7 +173,14 @@ public class UploadServlet extends HttpServlet {
 
 	BufferedImage fixRotationAndScale(BufferedImage image, int orientation ){
 
-		AffineTransform transform = getExifTransformation(orientation, image.getHeight(), image.getWidth());
+		float width = image.getWidth(null);
+		float height = image.getHeight(null);
+		float dim = width > height ? height : width;
+		int xOffset = (int) ( (width - dim ) / 2.0 );
+		int yOffset = (int) ( (height - dim ) / 2.0 );
+	    image = image.getSubimage( xOffset, yOffset, (int) dim, (int) dim);
+
+	    AffineTransform transform = getExifTransformation(orientation, image.getHeight(), image.getWidth());
 	    AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BICUBIC);
 
 	    BufferedImage destinationImage = op.createCompatibleDestImage(image,  (image.getType() == BufferedImage.TYPE_BYTE_GRAY)? image.getColorModel() : null );

@@ -44,7 +44,6 @@ function login() {
 				var jsonResp = JSON.parse(userRequest.responseText);
 				setCookie("token", jsonResp.token);
 				setCookie("username", jsonResp.username);
-				setCookie("guest",false);
 				document.getElementById("user").style.display = 'none';
 				location.href='/helpings/feed';
 			}
@@ -100,42 +99,8 @@ function createUser() {
 			} else {
 				setCookie("token",userRequest.responseText);
 				setCookie("username",gName);
-				setCookie("guest",false);
 				document.getElementById("user").style.display = 'none';
 				location.href='feed';
-			}
-		}
-	};
-
-	//Send the proper header information along with the request
-	userRequest.setRequestHeader("Content-type",
-	"application/x-www-form-urlencoded");
-	userRequest.send(paramString);
-	return false;
-}
-
-function requestToken() {
-
-	var token = getCookie("token");
-
-	var userRequest;
-	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
-		userRequest = new XMLHttpRequest();
-	} else {// code for IE6, IE5
-		userRequest = new ActiveXObject("Microsoft.XMLHTTP");
-	}
-
-	var params = new Object();
-	params.command = "request_token";
-	params.token = token;
-	var paramString = JSON.stringify(params);
-
-	userRequest.open("POST", "game", true);
-	userRequest.onreadystatechange = function() {
-		if (userRequest.readyState == 4) {
-			if ( userRequest.status == 200 ) {
-				setCookie("token",userRequest.responseText);
-				setCookie("guest",true);
 			}
 		}
 	};

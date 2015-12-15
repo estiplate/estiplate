@@ -50,24 +50,11 @@ function addNewPost(postInfo) {
 	var form = newpost.querySelector("#calform");
 	form.setAttribute("data_postid", post.rowid);
 	newpost.style.display = "";
-	var children = newpost.children;
-	for (var i = 0; i < children.length; i++) {
-		var child = children[i];
-		if (child.id != "") {
-			child.id = child.id + "_" + post.rowid;
-		}
-		if (child.form != "") {
-			child.form = child.form + "_" + post.rowid;
-		}
-	}
+	newpost.id="post_" + postInfo.rowid;
+	renameChildren(newpost, post.rowid)
 	document.getElementById("posts").appendChild(newpost);
 	if (postInfo.userguess != undefined && postInfo.userguess > 0) {
-		document.getElementById("calories_" + post.rowid).innerHTML = "Average: "
-				+ postInfo.average;
-		document.getElementById("guess_" + post.rowid).innerHTML = "Your Guess: "
-				+ postInfo.userguess;
-		showGuess(post.rowid, true);
-		showGuessInput(post.rowid, false);
+		populateGuess( postInfo.average, postInfo.userguess, postInfo.guesscount, post.rowid);
 		addComments( postInfo.comments, post.rowid);
 	} else {
 		if ( gToken == undefined || gToken.length == 0) { 
@@ -78,15 +65,62 @@ function addNewPost(postInfo) {
 	}
 }
 
+function populateGuess(average, guess, guesscount, post) {
+	document.getElementById("calories_" + post).innerHTML = "Average: "
+		+ average;
+	document.getElementById("guess_" + post).innerHTML = "Your Guess: "
+		+ guess;
+	var averageText;
+	if ( guesscount == 1) {
+		averageText = "on 1 guess"
+	} else {
+		averageText = "on " + guesscount + " guesses";
+	}
+	document.getElementById("guesscount_" + post).innerHTML = averageText;
+	if ( guesscount > 1 ) {
+		var g = parseInt(guess);
+		var a = parseInt(average);
+		var error = (g - a) / a * 100;
+		var errorString;
+		if ( error > 0 ) {
+			errorString = "▲" +  error.toFixed(0) + "%";
+		} else {
+			errorString = "▼" +  Math.abs(error).toFixed(0) + "%";
+		}
+		var accuracySpan = document.getElementById("guessaccuracy_" + post);
+		accuracySpan.innerHTML = errorString;
+		error = Math.abs(error);
+		if ( error < 10 ) {
+			accuracySpan.style.color = "darkgreen";
+		} else if ( error < 25 ) {
+			accuracySpan.style.color = "gold";
+		} else {
+			accuracySpan.style.color = "crimson";
+		}
+	}
+	showGuess(post, true);
+	showGuessInput(post, false);
+}
+
+function renameChildren( element, id ){
+	var children = element.children;
+	for (var i = 0; i < children.length; i++) {
+		var child = children[i];
+		if (child.id != "") {
+			child.id = child.id + "_" + id;
+		}
+		if (child.form != "") {
+			child.form = child.form + "_" + id;
+		}
+		renameChildren(child, id);
+	}
+}
+
 function showComments(post, show) {
 	if ( !show ) {
-		document.getElementById("comments_" + post).style.display = 'none';
-		document.getElementById("commentinput_" + post).style.display = 'none';
-		document.getElementById("commentbutton_" + post).style.display = 'none';
+		document.getElementById("commentarea_" + post).style.display = 'none';
 	} else {
-		document.getElementById("comments_" + post).style.display = '';
-		document.getElementById("commentinput_" + post).style.display = '';
-		document.getElementById("commentbutton_" + post).style.display = '';
+		document.getElementById("commentarea_" + post).style.display = '';
 	}
 }
 
@@ -100,11 +134,9 @@ function showGuessInput(post, show) {
 
 function showGuess(post, show) {
 	if ( !show ) {
-		document.getElementById("calories_" + post).style.display = 'none';
-		document.getElementById("guess_" + post).style.display = 'none';
+		document.getElementById("postinfo_" + post).style.display = 'none';
 	} else {
-		document.getElementById("calories_" + post).style.display = 'block';
-		document.getElementById("guess_" + post).style.display = 'block';
+		document.getElementById("postinfo_" + post).style.display = '';
 	}
 }
 
@@ -219,9 +251,8 @@ function handleGuessResponse() {
 			return;
 		}
 		console.log(jsonResp);
-		var post = jsonResp.post;
-		document.getElementById("calories_" + post).innerHTML = "Average: "
-				+ jsonResp.calories;
+		var post = jsonResp.rowid;
+		populateGuess( jsonResp.average, jsonResp.userguess, jsonResp.guesscount, post);
 		showGuess(post, true);
 		showGuessInput(post, false);
 		showComments(post, true);

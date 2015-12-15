@@ -49,7 +49,7 @@ public class FeedServlet extends HttpServlet {
 		String[] pathSegments = uri.split("/");
 		String filter = "";
 		String filterParam = "";
-		int page = 0;
+		int page = 1;
 		if ( pathSegments.length > 1 ) {
 			filter = pathSegments[1];
 			if ( filter.equals(FILTER_FEED) ) {
@@ -68,7 +68,7 @@ public class FeedServlet extends HttpServlet {
 			}
 		}
 		Map<String, String[]>params = request.getParameterMap();
-		int offset = page * PLATES_PER_PAGE;
+		int offset = (page - 1) * PLATES_PER_PAGE;
 		int limit = PLATES_PER_PAGE;
 		boolean json = false;
 		String username = null;
@@ -104,7 +104,7 @@ public class FeedServlet extends HttpServlet {
 			}
 
 			ArrayList<Post> posts = null;
-			ArrayList<Integer> guesses = null;
+			ArrayList<Average> averages = null;
 			ArrayList<Integer> userGuesses = null;
 			try {
 				if ( filter.equals(FILTER_USERS)) {
@@ -112,7 +112,7 @@ public class FeedServlet extends HttpServlet {
 				} else {
 					posts = mDatabase.getPostsInRange(offset, limit);					
 				}
-				guesses = mDatabase.getAveragesForPosts(posts);
+				averages = mDatabase.getAveragesForPosts(posts);
 				if ( username != null && username.length() > 0 && success) {
 					userGuesses = mDatabase.getUserGuessesForPosts(posts, username);
 				}
@@ -128,7 +128,15 @@ public class FeedServlet extends HttpServlet {
 					JSONObject postData = new JSONObject();
 					try {
 						postData.put( "post", post.toJson());
-						postData.put( "average", guesses.get(count));
+						Average ave = averages.get(count);
+						int average = 0;
+						int guesscount = 0;
+						if ( ave != null ) {
+							average = ave.average;
+							guesscount = ave.count;
+						}
+						postData.put( "average", average);
+						postData.put( "guesscount", guesscount);
 						if ( userGuesses != null ) {
 							postData.put( "userguess", userGuesses.get(count));
 

@@ -19,9 +19,11 @@
 		<img src="" class="foodThumb" id="beforethumb"> <br> <span
 			class="posttitle" id="title"> </span> <br> <span
 			class="userlabel">Posted by </span><a class="username" id="username"></a>
-		at <span class="date" id="date"></span> 
-		<span class="posttitle" id="calories"></span>
-		<span class="posttitle" id="guess"></span>
+		at <span class="date" id="date"></span>
+		<div id="postinfo">
+			<span class="posttitle" id="calories"></span> <span class="posttitle" id="guesscount"></span><br>
+			<span class="posttitle" id="guess"></span> <span class="posttitle" id="guessaccuracy" style="margin-left: 10px;"></span><br>
+		</div>
 		<form class="calorieform" id="calform"
 			onsubmit="return sendGuess(this)">
 			<input type="number" name="calories" placeholder="Enter Estimate"
@@ -29,11 +31,12 @@
 				style="float: left; width: 200px; margin-right: 25px;"> <input
 				type="submit" value="Enter" style="float: left; width: 100px;"><br>
 		</form>
-		<div class="comments_wrapper"  style="margin-top: 10px;" id="comments"></div>
-		<textarea id="commentinput" style="width: 100%; margin-top: 5px"></textarea>
-		<button id="commentbutton"
-			style="float: left; width: 250px; margin-top: 10px"
-			onclick="postComment(this)">Add Comment</button>
+		<div id="commentarea">
+			<div class="comments_wrapper" id="comments"></div>
+			<textarea id="commentinput" style="width: 100%;"></textarea>
+			<button id="commentbutton" style="width: 250px;"
+				onclick="postComment(this)">Add Comment</button>
+		</div>
 	</div>
 	<div class="comment" id="templatecomment" style="display: none;">
 		<div class="comment_text" id="commenttext"></div>
