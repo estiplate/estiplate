@@ -7,7 +7,7 @@ html, body {
 
 body, input, button, select, option, textarea, form, td, tr, table {
 	font-family: 'Varela Round', Helvetica, Arial, sans-serif;
-	font-size: 24px;
+	font-size: 100%;
 }
 
 table {
@@ -27,6 +27,10 @@ td {
 	border-width: 5px;
 	border-spacing: 2px;
 	border-style: outset;
+}
+
+.postmetadata {
+	font-size: 80%;
 }
 
 #start, #message, #user, #login {
@@ -90,47 +94,33 @@ input[type=text], input[type=password] {
 
 .pagetitle {
 	font-family: 'Varela Round', Futura, Helvetica, Arial, sans-serif;
-	font-size: 48px;
-	float: left;
+	font-size: 200%;
 }
 
-.post {
-	padding-top: 25px;
-	padding-left: 25px;
-	padding-right: 25px;
+.foodPic {
+	width: 100%;
 	padding-bottom: 25px;
-	margin-left: 100px;
-	margin-right: 100px;
-	margin-top: 20px;
-	background-color: #ffffff;
 	border-radius: 5px;
-	box-shadow: 2px 2px grey;
-	min-width: 450px;
 }
 
 .foodThumb {
-	width: 100%;
+	width: 30%;
 	padding-bottom: 10px;
 }
 
 #header {
-	margin-right: 100px;
-	margin-left: 100px;
-	margin-top: 10px;
 	padding-top: 10px;
 	padding-bottom: 10px;
-	height: 50px;
-	min-width: 500px;
+	height: 40px;
+	position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+  	z-index: 3;
+  	background: #b0c4de;
+  	border-bottom: 1px solid white;
 }
 
-#postbutton {
-	text-align: center;
-	width: 200px;
-	margin: auto;
-	margin-top: 10px;
-	padding-top: 10px;
-	padding-bottom: 10px;
-}
 
 #sidebar {
 	position: absolute;
@@ -164,6 +154,10 @@ input[type=text], input[type=password] {
 	padding-bottom: 10px;
 }
 
+#posts {
+	clear: left;
+}
+
 .comment {
 	background-color: #ffffff;
 	border: 1px solid #bf185d;
@@ -174,4 +168,77 @@ input[type=text], input[type=password] {
 .comment_metadata {
 	color: #777777;
 	font-size: 14px;
+}
+
+
+.post {
+	-webkit-perspective: 800;
+	-ms-perspective: 800;
+	-moz-perspective: 800;
+	-o-perspective: 800;
+	width: 350px;
+	height: 500px;
+	position: relative;
+	margin: 20px;
+	display: inline-block;
+}
+
+.cardcontent {
+ 	margin: 20px;
+}
+
+.calorieform {
+	margin-top: 25px;
+}
+
+.post .card.flipped {
+	transform: rotatey(-180deg);
+	-ms-transform: rotatey(-180deg); /* IE 9 */
+	-moz-transform: rotatey(-180deg); /* Firefox */
+	-webkit-transform: rotatey(-180deg); /* Safari and Chrome */
+	-o-transform: rotatey(-180deg); /* Opera */
+}
+
+.post .card {
+	width: 100%;
+	height: 100%;
+	-webkit-transform-style: preserve-3d;
+	-webkit-transition: 0.5s;
+	-moz-transform-style: preserve-3d;
+	-moz-transition: 0.5s;
+	-ms-transform-style: preserve-3d;
+	-ms-transition: 0.5s;
+	-o-transform-style: preserve-3d;
+	-o-transition: 0.5s;
+	transform-style: preserve-3d;
+	transition: 0.5s;
+}
+
+.post .card .face {
+	background-color: #ffffff;
+	border-radius: 5px;
+	box-shadow: 2px 2px grey;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	z-index: 2;
+	backface-visibility: hidden; /* W3C */
+	-webkit-backface-visibility: hidden; /* Safari & Chrome */
+	-moz-backface-visibility: hidden; /* Firefox */
+	-ms-backface-visibility: hidden; /* Internet Explorer */
+	-o-backface-visibility: hidden; /* Opera */
+}
+
+.post .card .front {
+	position: absolute;
+	z-index: 1;
+}
+
+.post .card .back {
+	background: white;
+	transform: rotatey(-180deg);
+	-ms-transform: rotatey(-180deg); /* IE 9 */
+	-moz-transform: rotatey(-180deg); /* Firefox */
+	-webkit-transform: rotatey(-180deg); /* Safari and Chrome */
+	-o-transform: rotatey(-180deg); /* Opera */
 }

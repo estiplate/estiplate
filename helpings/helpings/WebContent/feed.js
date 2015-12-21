@@ -9,7 +9,7 @@ window.onload = function() {
 
 	gToken = getCookie("token");
 	if ( gToken == undefined || gToken.length == 0) {
-		document.getElementById("postbutton").value = "Login";
+		document.getElementById("postbutton").innerHTML = "Login";
 	}
 	sendFeedRequest();
 }
@@ -39,8 +39,10 @@ function addNewPost(postInfo) {
 
 	var template = document.getElementById("templatepost");
 	var newpost = template.cloneNode(true);
-	newpost.querySelector("#beforethumb").src = "/helpings/image/thumb"
+	newpost.querySelector(".foodPic").src = "/helpings/image/thumb"
 			+ post.beforeimage;
+	newpost.querySelector(".foodThumb").src = "/helpings/image/thumb"
+		+ post.beforeimage;
 	newpost.querySelector("#title").innerHTML = post.title;
 	newpost.querySelector("#username").innerHTML = post.username;
 	newpost.querySelector("#username").href = "/helpings/users/"
@@ -54,6 +56,7 @@ function addNewPost(postInfo) {
 	renameChildren(newpost, post.rowid)
 	document.getElementById("posts").appendChild(newpost);
 	if (postInfo.userguess != undefined && postInfo.userguess > 0) {
+		newpost.querySelector(".card").classList.toggle('flipped');
 		populateGuess( postInfo.average, postInfo.userguess, postInfo.guesscount, post.rowid);
 		addComments( postInfo.comments, post.rowid);
 	} else {
@@ -66,7 +69,7 @@ function addNewPost(postInfo) {
 }
 
 function populateGuess(average, guess, guesscount, post) {
-	document.getElementById("calories_" + post).innerHTML = "Average: "
+	document.getElementById("calories_" + post).innerHTML = "Ave: "
 		+ average;
 	document.getElementById("guess_" + post).innerHTML = "Your Guess: "
 		+ guess;
@@ -120,7 +123,7 @@ function showComments(post, show) {
 	if ( !show ) {
 		document.getElementById("commentarea_" + post).style.display = 'none';
 	} else {
-		document.getElementById("commentarea_" + post).style.display = '';
+		document.getElementById("commentarea_" + post).style.display = 'block';
 	}
 }
 
@@ -201,10 +204,12 @@ function handleFeedResponse() {
 
 function sendGuess(input) {
 
+
 	gInput = input;
 	console.log(input);
 	var calories = input["calories"].value;
 	var post_id = input.getAttribute("data_postid");
+	document.getElementById('card_' + post_id).classList.toggle('flipped');
 
 	document.getElementById("guess_" + post_id).innerHTML = "Your Guess: "
 			+ calories;
