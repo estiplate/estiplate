@@ -6,6 +6,7 @@
 <script type="text/javascript" charset="utf-8" src="/helpings/feed.js"></script>
 <script type="text/javascript" charset="utf-8" src="/helpings/utils.js"></script>
 <meta name="viewport" content="width=device-width">
+<link rel="icon" type="image/png" href="plate.png">
 </head>
 <body>
 
@@ -14,8 +15,8 @@
 		<a href="/helpings/upload.html" id="postbutton" style="float: right; margin-right: 20px; margin-top: 10px;">Upload</a>
 	</div>
 	<div class="post" id="templatepost" style="display: none;">
-		<div class="card" id="card">
-			<div class="front face">
+		<div class="card" id="card" onclick="onCardClick(this)">
+			<div class="front face" style="overflow: scroll;">
 				<div class="cardcontent">
 					<img src="" class="foodPic" id="beforepic"> <br> 
 					<span class="posttitle" id="title"> </span> <br>
@@ -29,11 +30,13 @@
 						<input type="submit" value="Enter" style="display: inline; width: 100px;"><br>
 					</form>
 				</div>
+				<img id="deletepost" src="/helpings/close.png" style="position: absolute; bottom: 10px; right: 10px; width: 32px; height: 32px; display: none;">
 			</div>
 			<div class="back face" style="overflow: scroll;">
 				<div class="cardcontent">
 					<img src="" style="display: inline; float: left; margin-right: 10px;" class="foodThumb" id="beforethumb">
 					<div id="postinfo" style="display: inline; text-align: left">
+						<span class="posttitle" id="titletwo"> </span> <br>
 						<span class="posttitle" id="calories"></span> 
 						<span class="posttitle" id="guesscount"></span><br> 
 						<span class="posttitle" id="guess"></span>

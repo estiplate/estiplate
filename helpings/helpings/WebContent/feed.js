@@ -44,15 +44,19 @@ function addNewPost(postInfo) {
 	newpost.querySelector(".foodThumb").src = "/helpings/image/thumb"
 		+ post.beforeimage;
 	newpost.querySelector("#title").innerHTML = post.title;
+	newpost.querySelector("#titletwo").innerHTML = post.title;
 	newpost.querySelector("#username").innerHTML = post.username;
 	newpost.querySelector("#username").href = "/helpings/users/"
 			+ post.username;
 	newpost.querySelector("#date").innerHTML = timeConverter(post.date);
+	if ( post.username == gUsername ) {
+		newpost.querySelector("#deletepost").style.display = "block";
+	}
 
 	var form = newpost.querySelector("#calform");
 	form.setAttribute("data_postid", post.rowid);
 	newpost.style.display = "";
-	newpost.id="post_" + postInfo.rowid;
+	newpost.id="post_" + post.rowid;
 	renameChildren(newpost, post.rowid)
 	document.getElementById("posts").appendChild(newpost);
 	if (postInfo.userguess != undefined && postInfo.userguess > 0) {
@@ -279,6 +283,7 @@ function postComment(button) {
 
 	if ( comment.length == 0 ) {
 		alert("Comment field is empty");
+		return;
 	}
 	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
 		xmlhttp = new XMLHttpRequest();
@@ -357,4 +362,72 @@ function addComment( commentWrapper, comment ) {
 
 function getMoreComments( link ) {
 	console.log(link.id);
+}
+
+function deletePost(post_id) {
+
+	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+		xmlhttp = new XMLHttpRequest();
+	} else {// code for IE6, IE5
+		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+
+	var params = new Object();
+	params.post = post_id;
+	params.username = getCookie("username");
+	params.token = getCookie("token");
+	var paramString = JSON.stringify(params);
+
+	xmlhttp.open("POST", "/helpings/delete", true);
+	xmlhttp.onreadystatechange = handleCommentResponse;
+
+	// Send the proper header information along with the request
+	xmlhttp.setRequestHeader("Content-type",
+			"application/x-www-form-urlencoded");
+	xmlhttp.send(paramString);
+	console.log(paramString);
+	return false;
+}
+
+function handleCommentResponse() {
+	var len = xmlhttp.responseText.length;
+	var xmlResp = xmlhttp.responseText.substring(gResponsePtr, len);
+
+	if (xmlhttp.readyState == 3) {
+
+		// Success! Reset retries
+		gRetryCount = 0;
+
+		// This is really kind of ugly. We keep feeding more data in and seeing
+		// if it parses sucessfully. When it does, we know we have a complete
+		// command
+		var jsonResp = JSON.parse(xmlResp);
+		if (jsonResp == null) {
+			return;
+		}
+		console.log(jsonResp);
+		var postId = jsonResp.postId;
+		var el = document.getElementById("post_" + postId);
+		el.parentNode.removeChild( el );
+		gResponsePtr = len;
+
+	} else if (xmlhttp.readyState == 4) {
+		gResponsePtr = 0;
+	}
+}
+
+function onCardClick(card){
+	var post_id = card.id.split("_")[1];
+	console.log(event.target + " " + event.target.itemType + " " + event.target.class );
+	if ( event.target.id == "deletepost_" +  post_id) {
+		if ( confirm ("Are you sure you want to delete this post?") ) {
+			deletePost(post_id);
+		}
+		return;
+	}
+	if ( ( event.target.type != 'textarea') && ( event.target.type != 'submit' ) )  {
+		if( document.getElementById("postinfo_" + post_id).style.display != 'none' ) {
+			card.classList.toggle('flipped');
+		}
+	}
 }

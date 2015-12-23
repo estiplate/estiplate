@@ -24,7 +24,7 @@ public class FeedServlet extends HttpServlet {
 	private static final String FILTER_USERS = "users";
 	private static final String FILTER_FEED = "feed";
 	private static final String HELPINGS_PREFIX = "/helpings";
-	private static final int PLATES_PER_PAGE = 20;
+	private static final int PLATES_PER_PAGE = 18;
 	private static final int INITIAL_COMMENTS = 10;
 
 	public void init(ServletConfig config) throws ServletException {

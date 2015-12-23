@@ -105,14 +105,6 @@ input[type=text],input[type=password], input[type=email] {
 
 #uploadinput { visibility: hidden; }
 
-#preview {
-    height: auto; 
-    width: auto; 
-    max-width: 300px; 
-    max-height: 300px;
-}
-
-
 .post {
     margin-left: 50px;
     margin-top: 50px;

@@ -19,7 +19,7 @@ public class HelpingsDatabase
 	static final String GET_USER_BY_EMAIL = "select * from users where email=?";
 	static final String GET_USER_BY_TOKEN = "select * from users where token=?";
 	static final String UPDATE_USER_TOKEN = "update users set token=? where email=?";
-	static final String CREATE_POST_TABLE = "create table if not exists posts (username string, title string, beforeimage string, afterimage string, calories int, guesses int, date int)";
+	static final String CREATE_POST_TABLE = "create table if not exists posts (rowid integer primary key autoincrement, username string, title string, beforeimage string, afterimage string, calories int, guesses int, date int)";
 	static final String CREATE_POST = "insert into posts (username, title, beforeimage, afterimage, calories, guesses, date) values (?,?,?,?,?,?,?)";
 	static final String LAST_POST = "select last_insert_rowid() from posts";
 	static final String GET_POSTS_IN_RANGE = "select rowid, username, title, beforeimage, afterimage, date from posts order by rowid desc limit ? offset ?;";
@@ -32,6 +32,7 @@ public class HelpingsDatabase
 	static final String CREATE_COMMENT_TABLE = "create table if not exists comments (post int, username string, comment string, date int)";
 	static final String CREATE_COMMENT = "insert into comments (post, username, comment, date) values (?,?,?,?)";
 	static final String GET_COMMENTS_FOR_POST = "select * from comments where post=? limit ? offset ?;";
+	static final String DELETE_POST = "delete from posts where rowid=? and username=?";
 
 	static final String DATABASE_CONNECTION_STRING = "jdbc:sqlite:/var/www/helpings.db";
 
@@ -506,6 +507,31 @@ public class HelpingsDatabase
 			closeConnection(connection);
 		}
 		return comments;
+	}
+
+	public boolean deletePost( long post, String username ) {
+		boolean success = false;
+		Connection connection = null;
+		try
+		{
+			// create a database connection
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+			PreparedStatement statement = connection.prepareStatement(DELETE_POST);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			statement.setLong(1, post);
+			statement.setString(2, username);
+			statement.executeUpdate();
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+
+		return success;
 	}
 
 	private void closeConnection(Connection connection){

@@ -5,49 +5,61 @@
 <meta name="viewport"
 	content="width=device-width, initial-scale=1.0, user-scalable=no" />
 <link rel="stylesheet" type="text/css" href="styles.css">
+<link rel="stylesheet" type="text/css" href="upload.css">
 <script type="text/javascript" charset="utf-8" src="/helpings/utils.js"></script>
 <script type="text/javascript">
+	window.onload = function() {
+		document.getElementById("name_input").value = getCookie("username");
+		document.getElementById("token_input").value = getCookie("token");
 
-window.onload = function() {
-	document.getElementById("name_input").value = getCookie("username");
-	document.getElementById("token_input").value = getCookie("token");
-
-	document.getElementById('get_file').onclick = function() {
-	    document.getElementById('uploadinput').click();
-	};
-	var token = getCookie("token");
-	if (token == undefined || token == "") {
-		window.location = "/helpings/";
+		document.getElementById('get_file').onclick = function() {
+			document.getElementById('uploadinput').click();
+		};
+		var token = getCookie("token");
+		if (token == undefined || token == "") {
+			window.location = "/helpings/";
+		}
 	}
-}
 
-function readURL(input) {
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        
-        reader.onload = function (e) {
-        	document.getElementById("preview").src=e.target.result;
-        }
-        
-        reader.readAsDataURL(input.files[0]);
-    }
-    
-}
+	function readURL(input) {
+		if (input.files && input.files[0]) {
+			var reader = new FileReader();
+
+			reader.onload = function(e) {
+				document.getElementById("preview").src = e.target.result;
+				document.getElementById("demoimage").style.display = 'none';
+			}
+
+			reader.readAsDataURL(input.files[0]);
+		}
+
+	}
 </script>
 </head>
 <body>
-<br>
-<br>
-<form action="upload" method="post" enctype="multipart/form-data" id="upload-form">
-<input type="file" name="file" size="50" id="uploadinput" onchange="readURL(this);"/>
-<br>
-<img id="preview" src="upload.png" alt="your image"/> <br> <br>
-<input type="button" id="get_file" value="Select Image"> <br> <br>
-<input type="text" name="title" placeholder="Description"> <br>
-<input type="text" id="name_input" name="username" style="display:none;"> <br>
-<input type="text" id="token_input" name="token" style="display:none;"> <br>
-<input type="submit" value="Post Helping" id="uploadfile"/>
+	<div id="header">
+		<span class="pagetitle" style="margin-left: 20px;">ESTIPLATE</span> 
+	</div>
+	<br>
+	<br>
+	<form action="upload" method="post" enctype="multipart/form-data"
+		id="upload-form">
+		<input type="file" name="file" size="50" id="uploadinput" onchange="readURL(this);" /> <br> 
+		<div id="demoimage" style="position: relative; margin: 0 auto;">
+			<img class="preview" src="food.png" alt="your image" style="-webkit-filter: grayscale(100%);">
+			<div style="display: inline-block; position: absolute; top: 0; left: 0;">
+				<img src="upload.png" alt="your image" style="-webkit-filter: invert(100%); position: relative; margin: 75px; width: 50%; z-index: 3;"/>
+			</div>
+		</div>
+		<br>
+		<br> 
+		<img id="preview" class="preview">
+		<input type="button" id="get_file" value="Select Image"> <br> <br>
+		<input type="text" name="title" placeholder="Description"> <br>
+		<input type="text" id="name_input" name="username" style="display: none;"> <br> 
+		<input type="text" id="token_input" name="token" style="display: none;"> <br>
+		<input type="submit" value="Post Helping" id="uploadfile" />
 
-</form>
+	</form>
 </body>
 </html>
