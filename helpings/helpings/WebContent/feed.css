@@ -242,3 +242,13 @@ input[type=text], input[type=password] {
 	-webkit-transform: rotatey(-180deg); /* Safari and Chrome */
 	-o-transform: rotatey(-180deg); /* Opera */
 }
+
+.tag {
+  	background: #bf185d;
+  	color: #ffffff;
+  	border-radius: 2px;
+  	padding: 2px;
+  	margin: 2px;
+  	font-size: 80%;
+  	display: inline-block;
+}

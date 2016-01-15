@@ -1,5 +1,6 @@
 <html>
 <head>
+<title>ESTIPLATE</title>
 <link href='https://fonts.googleapis.com/css?family=Varela+Round'
 	rel='stylesheet' type='text/css'>
 <link rel="stylesheet" type="text/css" href="/helpings/feed.css">
@@ -19,7 +20,8 @@
 			<div class="front face" style="overflow: scroll;">
 				<div class="cardcontent">
 					<img src="" class="foodPic" id="beforepic"> <br> 
-					<span class="posttitle" id="title"> </span> <br>
+					<span id="title"> </span> <br>
+					<div id="tags"> </div>
 					<span class="postmetadata">
 					<span class="userlabel">Posted by </span>
 					<a class="username" id="username"></a> at <span class="date" id="date"></span></span>
@@ -30,13 +32,14 @@
 						<input type="submit" value="Enter" style="display: inline; width: 100px;"><br>
 					</form>
 				</div>
-				<img id="deletepost" src="/helpings/close.png" style="position: absolute; bottom: 10px; right: 10px; width: 32px; height: 32px; display: none;">
+				<img id="deletepost" src="/helpings/close.png" style="position: absolute; bottom: 5px; right: 5px; width: 32px; height: 32px; display: none;">
 			</div>
 			<div class="back face" style="overflow: scroll;">
 				<div class="cardcontent">
 					<img src="" style="display: inline; float: left; margin-right: 10px;" class="foodThumb" id="beforethumb">
 					<div id="postinfo" style="display: inline; text-align: left">
 						<span class="posttitle" id="titletwo"> </span> <br>
+						<div id="tagstwo"> </div>
 						<span class="posttitle" id="calories"></span> 
 						<span class="posttitle" id="guesscount"></span><br> 
 						<span class="posttitle" id="guess"></span>

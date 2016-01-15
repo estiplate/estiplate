@@ -1,5 +1,7 @@
 <html>
 <head>
+<title>ESTIPLATE</title>
+
 <link href='https://fonts.googleapis.com/css?family=Varela+Round'
 	rel='stylesheet' type='text/css'>
 <meta name="viewport"
@@ -12,7 +14,7 @@
 		document.getElementById("name_input").value = getCookie("username");
 		document.getElementById("token_input").value = getCookie("token");
 
-		document.getElementById('get_file').onclick = function() {
+		document.getElementById('demoimage').onclick = function() {
 			document.getElementById('uploadinput').click();
 		};
 		var token = getCookie("token");
@@ -34,32 +36,81 @@
 		}
 
 	}
+
+	function addTag(e) {
+		if (e && e.keyCode == 13) {
+			var taginput = document.getElementById("addtag");
+			var tag = taginput.value.toLowerCase();
+			taginput.value = "";
+			var tags = document.getElementById("tags");
+			var tagSpan = document.createElement('span')
+			tagSpan.innerHTML = tag + " x";
+			tagSpan.className = "tag";
+			tagSpan.setAttribute('onclick','removeTag(this)');
+			tags.appendChild(tagSpan);
+		}
+	}
+
+	function removeTag(span) {
+		var tag = span.innerHTML;
+		var tags = document.getElementById("tags");
+		var taglist = tags.children;
+		for (var i = 0; i < taglist.length; i++ ) {
+			if ( taglist[i].innerHTML == tag ) {
+				tags.removeChild(taglist[i]);
+			}
+		}
+	}
+
+	function checkSubmit(e) {
+		if (e && e.keyCode == 13) {
+			addTagsAndSubmit();
+		}
+	}
+
+	function addTagsAndSubmit() {
+		var tags = document.getElementById("tags");
+		var taglist = tags.children;
+		var tagarray = [];
+		for (var i = 0; i < taglist.length; i++ ) {
+			if ( taglist[i].className == "tag" ) {
+				var tag = taglist[i].innerHTML;
+				tagarray.push(tag.substring(0, tag.length - 2));
+			}
+		}
+		document.getElementById("tag_input").value =  JSON.stringify(tagarray);
+		document.getElementById("uploadform").submit();	
+	}
+	
 </script>
 </head>
 <body>
 	<div id="header">
-		<span class="pagetitle" style="margin-left: 20px;">ESTIPLATE</span> 
+		<span class="pagetitle" style="margin-left: 20px;">ESTIPLATE</span>
 	</div>
 	<br>
 	<br>
-	<form action="upload" method="post" enctype="multipart/form-data"
-		id="upload-form">
-		<input type="file" name="file" size="50" id="uploadinput" onchange="readURL(this);" /> <br> 
+	<form action="upload" method="post" enctype="multipart/form-data" id="uploadform">
+		<input type="file" name="file" size="50" id="uploadinput" accept="image/*" capture="camera"
+			onchange="readURL(this);" /> <br>
 		<div id="demoimage" style="position: relative; margin: 0 auto;">
-			<img class="preview" src="food.png" alt="your image" style="-webkit-filter: grayscale(100%);">
-			<div style="display: inline-block; position: absolute; top: 0; left: 0;">
-				<img src="upload.png" alt="your image" style="-webkit-filter: invert(100%); position: relative; margin: 75px; width: 50%; z-index: 3;"/>
+			<img class="preview" src="food.png" alt="your image"
+				style="-webkit-filter: grayscale(100%);">
+			<div
+				style="display: inline-block; position: absolute; top: 0; left: 0;">
+				<img src="upload.png" alt="your image"
+					style="-webkit-filter: invert(100%); position: relative; margin: 75px; width: 50%; z-index: 3;" />
 			</div>
 		</div>
-		<br>
-		<br> 
 		<img id="preview" class="preview">
-		<input type="button" id="get_file" value="Select Image"> <br> <br>
-		<input type="text" name="title" placeholder="Description"> <br>
-		<input type="text" id="name_input" name="username" style="display: none;"> <br> 
-		<input type="text" id="token_input" name="token" style="display: none;"> <br>
-		<input type="submit" value="Post Helping" id="uploadfile" />
-
+		<br>
+		<input type="text" onKeyPress="checkSubmit(event)" name="title" placeholder="Description"> <br>
+		<div id="tags" style="padding-top: 10px; padding-bottom:10px;"><span class="tagtitle">Tags:</span></div>
+		<input type="text" onKeyPress="return addTag(event)" id="addtag" placeholder="Add a tag and press enter">
+		<input type="button" value="Post Helping" id="uploadfile" onclick="addTagsAndSubmit();"/>
+		<input type="text" id="name_input" name="username" style="display: none;">
+		<input type="text" id="tag_input" name="tags" style="display: none;">
+		<input type="text" id="token_input" name="token" style="display: none;">
 	</form>
 </body>
 </html>

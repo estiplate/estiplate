@@ -39,12 +39,22 @@ function addNewPost(postInfo) {
 
 	var template = document.getElementById("templatepost");
 	var newpost = template.cloneNode(true);
-	newpost.querySelector(".foodPic").src = "/helpings/image/thumb"
-			+ post.beforeimage;
-	newpost.querySelector(".foodThumb").src = "/helpings/image/thumb"
+	var imageName = "https://s3-us-west-2.amazonaws.com/estiplate/thumbs/thumb"
 		+ post.beforeimage;
+	newpost.querySelector(".foodPic").src = imageName;
+	newpost.querySelector(".foodThumb").src = imageName;
 	newpost.querySelector("#title").innerHTML = post.title;
 	newpost.querySelector("#titletwo").innerHTML = post.title;
+	var tagDiv = newpost.querySelector("#tags");
+	var tagTwoDiv = newpost.querySelector("#tagstwo");
+	if ( post.tags != undefined) {
+		var tagList = JSON.parse(post.tags);
+		addTags( tagTwoDiv, tagList);
+		addTags( tagDiv, tagList);
+	} else {
+		tagDiv.style.display = "none";
+		tagTwoDiv.style.display = "none";
+	}
 	newpost.querySelector("#username").innerHTML = post.username;
 	newpost.querySelector("#username").href = "/helpings/users/"
 			+ post.username;
@@ -52,6 +62,7 @@ function addNewPost(postInfo) {
 	if ( post.username == gUsername ) {
 		newpost.querySelector("#deletepost").style.display = "block";
 	}
+	
 
 	var form = newpost.querySelector("#calform");
 	form.setAttribute("data_postid", post.rowid);
@@ -69,6 +80,17 @@ function addNewPost(postInfo) {
 		}
 		showComments(post.rowid, false);
 		showGuess(post.rowid, false);
+	}
+}
+
+function addTags( tagDiv, tagList ) {
+	for (var i = 0; i < tagList.length; i++ ) {
+		var tag = tagList[i];
+		var tagSpan = document.createElement('a')
+		tagSpan.href = "/helpings/tag/" + tag;
+		tagSpan.innerHTML = tag;
+		tagSpan.className = "tag";
+		tagDiv.appendChild(tagSpan);
 	}
 }
 
@@ -379,7 +401,7 @@ function deletePost(post_id) {
 	var paramString = JSON.stringify(params);
 
 	xmlhttp.open("POST", "/helpings/delete", true);
-	xmlhttp.onreadystatechange = handleCommentResponse;
+	xmlhttp.onreadystatechange = handleDeleteResponse;
 
 	// Send the proper header information along with the request
 	xmlhttp.setRequestHeader("Content-type",
@@ -389,7 +411,7 @@ function deletePost(post_id) {
 	return false;
 }
 
-function handleCommentResponse() {
+function handleDeleteResponse() {
 	var len = xmlhttp.responseText.length;
 	var xmlResp = xmlhttp.responseText.substring(gResponsePtr, len);
 
@@ -423,6 +445,9 @@ function onCardClick(card){
 		if ( confirm ("Are you sure you want to delete this post?") ) {
 			deletePost(post_id);
 		}
+		return;
+	}
+	if ( event.target.className == "tag" ) { 
 		return;
 	}
 	if ( ( event.target.type != 'textarea') && ( event.target.type != 'submit' ) )  {

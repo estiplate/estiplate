@@ -15,13 +15,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-@WebServlet(urlPatterns = {"/feed/*", "/users/*"}, asyncSupported = true)
+@WebServlet(urlPatterns = {"/feed/*", "/users/*", "/tag/*"}, asyncSupported = true)
 public class FeedServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
 	private HelpingsDatabase mDatabase;
 	private static final String FILTER_USERS = "users";
+	private static final String FILTER_TAG = "tag";
 	private static final String FILTER_FEED = "feed";
 	private static final String HELPINGS_PREFIX = "/helpings";
 	private static final int PLATES_PER_PAGE = 18;
@@ -109,6 +110,9 @@ public class FeedServlet extends HttpServlet {
 			try {
 				if ( filter.equals(FILTER_USERS)) {
 					posts = mDatabase.getUserPostsInRange(offset, limit, filterParam);
+				} else if ( filter.equals(FILTER_TAG) ) {
+					String tag = java.net.URLDecoder.decode(filterParam, "UTF-8");
+					posts = mDatabase.getTagPostsInRange(offset, limit, tag);
 				} else {
 					posts = mDatabase.getPostsInRange(offset, limit);					
 				}

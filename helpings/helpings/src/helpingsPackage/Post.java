@@ -12,6 +12,7 @@ public class Post {
 	private static final String USERNAME = "username";
 	private static final String ID = "rowid";
 	private static final String DATE = "date";
+	private static final String TAGS = "tags";
 
 	public String beforeImageUrl;
 	public String afterImageUrl;
@@ -31,6 +32,7 @@ public class Post {
 			post.username = result.getString(USERNAME);
 			post.id = result.getInt(ID);
 			post.date = result.getLong(DATE);
+			post.tags = result.getString(TAGS);
 		} catch ( Exception SQLExeption ){
 
 		}
@@ -51,6 +53,7 @@ public class Post {
 			object.put(USERNAME, username);
 			object.put(ID, id);
 			object.put(DATE, date);
+			object.put(TAGS, tags);
 		} catch (Exception e ) {			
 		}
 

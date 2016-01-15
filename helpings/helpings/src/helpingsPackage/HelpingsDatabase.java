@@ -19,11 +19,11 @@ public class HelpingsDatabase
 	static final String GET_USER_BY_EMAIL = "select * from users where email=?";
 	static final String GET_USER_BY_TOKEN = "select * from users where token=?";
 	static final String UPDATE_USER_TOKEN = "update users set token=? where email=?";
-	static final String CREATE_POST_TABLE = "create table if not exists posts (rowid integer primary key autoincrement, username string, title string, beforeimage string, afterimage string, calories int, guesses int, date int)";
-	static final String CREATE_POST = "insert into posts (username, title, beforeimage, afterimage, calories, guesses, date) values (?,?,?,?,?,?,?)";
+	static final String CREATE_POST_TABLE = "create table if not exists posts (rowid integer primary key autoincrement, username string, title string, beforeimage string, afterimage string, calories int, guesses int, date int, tags string)";
+	static final String CREATE_POST = "insert into posts (username, title, beforeimage, afterimage, calories, guesses, date, tags) values (?,?,?,?,?,?,?,?)";
 	static final String LAST_POST = "select last_insert_rowid() from posts";
-	static final String GET_POSTS_IN_RANGE = "select rowid, username, title, beforeimage, afterimage, date from posts order by rowid desc limit ? offset ?;";
-	static final String GET_USER_POSTS_IN_RANGE = "select rowid, username, title, beforeimage, afterimage, date from posts where username=? order by rowid desc limit ? offset ?;";
+	static final String GET_POSTS_IN_RANGE = "select rowid, username, title, beforeimage, afterimage, date, tags from posts order by rowid desc limit ? offset ?;";
+	static final String GET_USER_POSTS_IN_RANGE = "select rowid, username, title, beforeimage, afterimage, date, tags from posts where username=? order by rowid desc limit ? offset ?;";
 	static final String CREATE_GUESS_TABLE = "create table if not exists guesses (post int, username string, calories int)";
 	static final String CREATE_GUESS = "insert into guesses (post, username, calories) values (?,?,?)";
 	static final String GET_GUESSES_FOR_POST = "select * from guesses where post=?";
@@ -33,7 +33,9 @@ public class HelpingsDatabase
 	static final String CREATE_COMMENT = "insert into comments (post, username, comment, date) values (?,?,?,?)";
 	static final String GET_COMMENTS_FOR_POST = "select * from comments where post=? limit ? offset ?;";
 	static final String DELETE_POST = "delete from posts where rowid=? and username=?";
-
+	static final String CREATE_TAG_TABLE = "create table if not exists tags (post int, tag string)";
+	static final String CREATE_TAG = "insert into tags (post, tag) values (?,?)";
+	static final String GET_POSTS_FOR_TAG_IN_RANGE = "select rowid, username, title, beforeimage, afterimage, date, tags from posts where rowid in (select post from tags where tag=?)  order by rowid desc limit ? offset ? ";
 	static final String DATABASE_CONNECTION_STRING = "jdbc:sqlite:/var/www/helpings.db";
 
 	public void init() throws ClassNotFoundException
@@ -53,6 +55,7 @@ public class HelpingsDatabase
 			statement.executeUpdate(CREATE_POST_TABLE);
 			statement.executeUpdate(CREATE_GUESS_TABLE);
 			statement.executeUpdate(CREATE_COMMENT_TABLE);
+			statement.executeUpdate(CREATE_TAG_TABLE);
 		}
 		catch(SQLException e)
 		{
@@ -184,7 +187,7 @@ public class HelpingsDatabase
 		return token;
 	}
 
-	public int createPost(String username, String title, String beforeimage, String afterimage, long date) throws NoSuchAlgorithmException{
+	synchronized public int createPost(String username, String title, String beforeimage, String afterimage, long date, String tags) throws NoSuchAlgorithmException{
 
 		int result = 0;
 
@@ -203,6 +206,7 @@ public class HelpingsDatabase
 			statement.setInt(5, 0);
 			statement.setInt(6, 0);
 			statement.setLong(7, date);
+			statement.setString(8, tags);
 
 			statement.executeUpdate();
 
@@ -271,6 +275,39 @@ public class HelpingsDatabase
 			PreparedStatement statement = connection.prepareStatement(GET_USER_POSTS_IN_RANGE);
 			statement.setQueryTimeout(30);  // set timeout to 30 sec.
 			statement.setString(1, username);
+			statement.setInt(2, limit);
+			statement.setInt(3, offset);
+			ResultSet rs = statement.executeQuery();
+			while( rs.next() ) {
+				posts.add( Post.creatPost(rs) );
+			}	
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		return posts;
+	}
+
+	public ArrayList<Post> getTagPostsInRange(int offset, int limit, String tag) throws NoSuchAlgorithmException{
+
+		ArrayList<Post> posts = new ArrayList<Post>();
+		if ( limit > 100 ) {
+			return null;
+		}
+
+		Connection connection = null;
+		try
+		{
+			// create a database connection
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+			PreparedStatement statement = connection.prepareStatement(GET_POSTS_FOR_TAG_IN_RANGE);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			statement.setString(1, tag);
 			statement.setInt(2, limit);
 			statement.setInt(3, offset);
 			ResultSet rs = statement.executeQuery();
@@ -532,6 +569,32 @@ public class HelpingsDatabase
 		}
 
 		return success;
+	}
+
+	public void createTag(int post, String tag) throws NoSuchAlgorithmException{
+
+		Connection connection = null;
+		try
+		{
+			// In future, this should keep a user from guessing for the same post multiple times.
+			// For now, nope.
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+
+			PreparedStatement statement = connection.prepareStatement(CREATE_TAG);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			statement.setLong(1, post);
+			statement.setString(2, tag);
+			statement.executeUpdate();
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+			return;
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
 	}
 
 	private void closeConnection(Connection connection){

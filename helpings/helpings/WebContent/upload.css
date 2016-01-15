@@ -22,3 +22,18 @@
     max-width: 300px; 
     max-height: 300px;
 }
+
+.tag {
+  	background: #bf185d;
+  	color: #ffffff;
+  	border-radius: 3px;
+  	padding: 2px;
+  	margin: 2px;
+  	display: inline-block;
+}
+
+.tagtitle {
+  	padding: 2px;
+  	margin: 2px;
+  	display: inline-block;
+}
