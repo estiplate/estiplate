@@ -156,9 +156,9 @@ public class UploadServlet extends HttpServlet {
 		BufferedImage img = null;
 		try {
 			img = ImageIO.read(imagefile);
-			BufferedImage thumb = fixRotationAndScale(img, rotation);
+//			BufferedImage thumb = fixRotationAndScale(img, rotation);
 			File outputfile = new File(UPLOAD_PATH + "thumb" + filename);
-			ImageIO.write(thumb, "jpg", outputfile);
+			ImageIO.write(img, "jpg", outputfile);
 			imagefile.delete();
 			uploadToS3("thumb" + filename);
 		} catch (IOException e) {

@@ -11,6 +11,9 @@ window.onload = function() {
 	if ( gToken == undefined || gToken.length == 0) {
 		document.getElementById("postbutton").innerHTML = "Login";
 	}
+	document.getElementById('postbutton').onclick = function() {
+		document.getElementById('uploadinput').click();
+	};
 	sendFeedRequest();
 }
 
@@ -454,5 +457,157 @@ function onCardClick(card){
 		if( document.getElementById("postinfo_" + post_id).style.display != 'none' ) {
 			card.classList.toggle('flipped');
 		}
+	}
+}
+
+var img;
+function readURL(input) {
+
+	if (input.files && input.files[0]) {
+		var reader = new FileReader();
+
+		reader.addEventListener("load", function() {
+			img = new Image;
+			img.onload = loadImage;
+			img.src = reader.result;
+		});
+
+		reader.readAsDataURL(input.files[0]);
+		document.getElementById("cover").style.display = 'block';
+		document.getElementById("uploadScreen").style.display = 'block';
+	}
+
+}
+
+function loadImage(){ 
+	var img = this;
+	var orientation;
+	EXIF.getData(img, function() {
+		orientation = EXIF.getTag(img, "Orientation");
+    });
+	var myCanvas = document.getElementById('preview');
+	var ctx = myCanvas.getContext('2d');
+	ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
+	var imageSize = myCanvas.width;
+	var h = img.height;
+	var w = img.width;
+	var unscaledSize;
+	var x = 0;
+	var y = 0;
+	if ( w > h ) {
+		x = ( w - h ) / 2;
+		unscaledSize = h;
+	} else if ( h > w ) {
+		y = ( h - w ) / 2;
+		unscaledSize = w;
+	}
+	ctx.setTransform(1, 0, 0, 1, 0, 0);
+	fixRotation(ctx, orientation, imageSize);
+	ctx.drawImage(img, x, y, unscaledSize, unscaledSize, 0, 0, imageSize, imageSize);
+	myCanvas.style.display = 'block';
+}
+
+function fixRotation( ctx, orientation, imageSize ) {
+
+	if ( orientation == 2 ) {
+		ctx.setTransform(-1, 0, 0, 1, imageSize, 0);
+	} else if ( orientation == 3 ) {
+		ctx.setTransform(-1, 0, 0, -1, imageSize, imageSize );
+	} else if ( orientation == 4 ) {
+		ctx.setTransform(1, 0, 0, -1, 0, imageSize );
+	} else if ( orientation == 5 ) {
+		ctx.setTransform(0, 1, 1, 0, 0, 0);
+	} else if ( orientation == 6 ) {
+		ctx.setTransform(0, 1, -1, 0, imageSize , 0);
+	} else if ( orientation == 7 ) {
+		ctx.setTransform(0, -1, -1, 0, imageSize , imageSize);
+	} else if ( orientation == 8 ) {
+		ctx.setTransform(0, -1, 1, 0, 0, imageSize);
+	} else {
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+	}
+}
+function cancelUpload() {
+	document.getElementById("cover").style.display = 'none';
+	document.getElementById("uploadScreen").style.display = 'none';
+}
+
+function addTag(e) {
+	if (e && e.keyCode == 13) {
+		var taginput = document.getElementById("addtag");
+		var tag = taginput.value.toLowerCase();
+		taginput.value = "";
+		var tags = document.getElementById("tags");
+		var tagSpan = document.createElement('span')
+		tagSpan.innerHTML = tag + " x";
+		tagSpan.className = "tag";
+		tagSpan.setAttribute('onclick', 'removeTag(this)');
+		tags.appendChild(tagSpan);
+		return false;
+	}
+	return true;
+}
+
+function removeTag(span) {
+	var tag = span.innerHTML;
+	var tags = document.getElementById("tags");
+	var taglist = tags.children;
+	for (var i = 0; i < taglist.length; i++) {
+		if (taglist[i].innerHTML == tag) {
+			tags.removeChild(taglist[i]);
+		}
+	}
+}
+
+function addTagsAndSubmit() {
+	
+	document.getElementById("uploadOverlay").style.display = 'block';
+
+	var tags = document.getElementById("tags");
+	var taglist = tags.children;
+	var tagarray = [];
+	for (var i = 0; i < taglist.length; i++) {
+		if (taglist[i].className == "tag") {
+			var tag = taglist[i].innerHTML;
+			tagarray.push(tag.substring(0, tag.length - 2));
+		}
+	}
+	var tagJSON = JSON.stringify(tagarray);
+
+	var canvas = document.getElementById('preview');
+	var dataURL = canvas.toDataURL('image/jpeg');
+	var blob = dataURItoBlob(dataURL);
+
+	var description = document.getElementById('titleinput').value;
+
+	var fd = new FormData();
+	fd.append("canvasImage", blob);
+	fd.append("username", getCookie("username"));
+	fd.append("token", getCookie("token"));
+	fd.append("tags", tagJSON);
+	fd.append("title", description);
+	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+		xmlhttp = new XMLHttpRequest();
+	} else {// code for IE6, IE5
+		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	}	
+	xmlhttp.onreadystatechange = handlePostResponse;
+	xmlhttp.open("POST", "upload");
+	xmlhttp.send(fd);
+}
+
+function dataURItoBlob(dataURI) {
+    var byteString = atob(dataURI.split(',')[1]);
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: 'image/jpeg' });
+}
+
+function handlePostResponse(){
+	if (xmlhttp.readyState == 4) {
+		location.reload();
 	}
 }

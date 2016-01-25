@@ -113,14 +113,13 @@ input[type=text], input[type=password] {
 	padding-bottom: 10px;
 	height: 40px;
 	position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-  	z-index: 3;
-  	background: #b0c4de;
-  	border-bottom: 1px solid white;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: 3;
+	background: #b0c4de;
+	border-bottom: 1px solid white;
 }
-
 
 #sidebar {
 	position: absolute;
@@ -170,13 +169,12 @@ input[type=text], input[type=password] {
 	font-size: 14px;
 }
 
-
 .post {
 	-webkit-perspective: 800;
 	-ms-perspective: 800;
 	-moz-perspective: 800;
 	-o-perspective: 800;
-	width: 350px;
+	width: 320px;
 	height: 500px;
 	position: relative;
 	margin: 20px;
@@ -184,7 +182,7 @@ input[type=text], input[type=password] {
 }
 
 .cardcontent {
- 	margin: 20px;
+	margin: 20px;
 }
 
 .calorieform {
@@ -244,11 +242,82 @@ input[type=text], input[type=password] {
 }
 
 .tag {
+	background: #bf185d;
+	color: #ffffff;
+	border-radius: 2px;
+	padding: 2px;
+	margin: 2px;
+	font-size: 80%;
+	display: inline-block;
+}
+
+#cover {
+	position: fixed;
+	top: 0;
+	left: 0;
+	background: rgba(0, 0, 0, 0.6);
+	z-index: 5;
+	width: 100%;
+	height: 100%;
+	display: none;
+}
+
+#uploadScreen {
+	max-width: 320px;
+	margin: 25 auto;
+	margin-bottom: 100px;
+	padding: 15px;
+	position: relative;
+	z-index: 10;
+	box-shadow: 2px 2px grey;
+	background: #ffffff;
+	display: none;
+}
+
+#uploadOverlay {
+	position: absolute;
+	max-width: 320px;
+	background: #ffffff;
+	opacity: 0.4;
+	z-index: 11;
+	display: none;
+}
+
+.cancel {
+	display: block;
+	position: absolute;
+	top: 3px;
+	right: 2px;
+	background: #ffffff;
+	color: black;
+	height: 30px;
+	width: 35px;
+	font-size: 30px;
+	text-decoration: none;
+	text-align: center;
+	font-weight: bold;
+}
+
+.preview {
+	padding-top: 30px;
+	margin: 0 auto;
+    height: auto; 
+    width: auto; 
+    max-width: 300px; 
+    max-height: 300px;
+}
+
+.tag {
   	background: #bf185d;
   	color: #ffffff;
-  	border-radius: 2px;
+  	border-radius: 3px;
   	padding: 2px;
   	margin: 2px;
-  	font-size: 80%;
+  	display: inline-block;
+}
+
+.tagtitle {
+  	padding: 2px;
+  	margin: 2px;
   	display: inline-block;
 }

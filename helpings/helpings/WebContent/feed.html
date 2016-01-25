@@ -4,17 +4,35 @@
 <link href='https://fonts.googleapis.com/css?family=Varela+Round'
 	rel='stylesheet' type='text/css'>
 <link rel="stylesheet" type="text/css" href="/helpings/feed.css">
+<script type="text/javascript" charset="utf-8" src="/helpings/exif.js"></script>
 <script type="text/javascript" charset="utf-8" src="/helpings/feed.js"></script>
 <script type="text/javascript" charset="utf-8" src="/helpings/utils.js"></script>
 <meta name="viewport" content="width=device-width">
 <link rel="icon" type="image/png" href="plate.png">
 </head>
 <body>
-
 	<div id="header">
 		<span class="pagetitle" style="margin-left: 20px;">ESTIPLATE</span>
-		<a href="/helpings/upload.html" id="postbutton" style="float: right; margin-right: 20px; margin-top: 10px;">Upload</a>
+		<a href="javascript:void(0)" id="postbutton" style="float: right; margin-right: 20px; margin-top: 10px;">Upload</a>
 	</div>
+
+	<div id="cover"></div>
+	<div style="width: 100%; position: absolute;">
+	<div id="uploadScreen"> 
+	<div id="uploadOverlay"><img src="loader.gif" style="margin: 150px;"></div>
+	<a href="javascript:cancelUpload()" class="cancel">&times;</a>
+	<canvas id="preview" class="preview" width="600" height="600"></canvas>
+	<br>
+	<form><textarea id="titleinput" style="width: 100%;"></textarea></form>	
+	<div id="tags" style="padding-top: 10px; padding-bottom:10px;"><span class="tagtitle">Tags:</span></div>
+	<form><input type="text" onKeyPress="return addTag(event)" id="addtag" placeholder="Add a tag and press enter" style="width: 100%;"></form>
+	<button id="uploadfile" onclick="addTagsAndSubmit()">Post Helping</button></div>
+	<br>
+	</div>
+	
+	<form action="upload" method="post" enctype="multipart/form-data" id="uploadform" style="display: none;">
+	<input type="file" name="file" size="50" id="uploadinput" accept="image/*" capture="camera"
+			onchange="readURL(this);" /> </form>
 	<div class="post" id="templatepost" style="display: none;">
 		<div class="card" id="card" onclick="onCardClick(this)">
 			<div class="front face" style="overflow: scroll;">
@@ -61,8 +79,7 @@
 	</div>
 	<div id="posts" style="clear: left; text-align: center; padding-top: 50;"></div>
 	<p>
-		<a id="nextbutton" href="javascript:void(0)" onclick="nextPage();">Next</a>
-		<a id="logout" style="float: right; margin-right: 100px;"
-			href="javascript:void(0)" onclick="logout();">Logout</a>
+	<a id="nextbutton" href="javascript:void(0)" onclick="nextPage();">Next</a>
+	<a id="logout" style="float: right; margin-right: 100px;" href="javascript:void(0)" onclick="logout();">Logout</a>
 </body>
 <html>
