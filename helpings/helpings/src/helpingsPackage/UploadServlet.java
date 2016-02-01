@@ -156,7 +156,10 @@ public class UploadServlet extends HttpServlet {
 		BufferedImage img = null;
 		try {
 			img = ImageIO.read(imagefile);
-//			BufferedImage thumb = fixRotationAndScale(img, rotation);
+			// Support old upload
+			if ( img.getWidth() != 600 && img.getHeight() != 600 ) {
+				img = fixRotationAndScale(img, rotation);
+			}
 			File outputfile = new File(UPLOAD_PATH + "thumb" + filename);
 			ImageIO.write(img, "jpg", outputfile);
 			imagefile.delete();

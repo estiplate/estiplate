@@ -463,6 +463,7 @@ function onCardClick(card){
 var img;
 function readURL(input) {
 
+	window.scrollTo(0, 0);
 	if (input.files && input.files[0]) {
 		var reader = new FileReader();
 
@@ -559,8 +560,13 @@ function removeTag(span) {
 	}
 }
 
+var submitting = false;
 function addTagsAndSubmit() {
-	
+
+	if ( submitting ) {
+		return;
+	}
+	submitting = true;
 	document.getElementById("uploadOverlay").style.display = 'block';
 
 	var tags = document.getElementById("tags");

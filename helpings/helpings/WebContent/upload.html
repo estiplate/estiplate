@@ -79,7 +79,7 @@
 			}
 		}
 		document.getElementById("tag_input").value =  JSON.stringify(tagarray);
-		document.getElementById("uploadform").submit();	
+		document.getElementById("upload-form").submit();	
 	}
 	
 </script>
@@ -90,7 +90,7 @@
 	</div>
 	<br>
 	<br>
-	<form action="upload" method="post" enctype="multipart/form-data" id="uploadform">
+	<form action="upload" method="post" enctype="multipart/form-data" id="upload-form">
 		<input type="file" name="file" size="50" id="uploadinput" accept="image/*" capture="camera"
 			onchange="readURL(this);" /> <br>
 		<div id="demoimage" style="position: relative; margin: 0 auto;">
