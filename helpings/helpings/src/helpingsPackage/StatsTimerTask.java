@@ -12,9 +12,7 @@ public class StatsTimerTask extends TimerTask {
 	private static final long ONE_WEEK = 3600 * 24 * 7 * 1000;
 	static private int mRuns = 0;
 	static private String mMostGuessesUser = "";
-	static private int mMostGuesses = 0;
 	static private String mMostAccurateUser = "";
-	static private float mBestAccuracy = -1;
 	static private ArrayList<StatsUser> mUsers = new ArrayList<StatsUser>();
 
 	public class StatsUser implements Comparable<StatsUser> {
@@ -52,6 +50,8 @@ public class StatsTimerTask extends TimerTask {
 			ArrayList<Post> posts = mDatabase.getPostsSince(date.getTime() -  ONE_WEEK );
 			ArrayList<Average> averages = mDatabase.getAveragesForPosts(posts);
 			ArrayList<String> usernames = mDatabase.getUsers();
+			int mostGuesses = 0;
+			float bestAccuracy = -1;
 			for ( String username: usernames ) {
 					ArrayList<Integer> userGuesses = mDatabase.getUserGuessesForPosts(posts, username);
 					ArrayList<Float> percentErrors = new ArrayList<Float>();
@@ -78,12 +78,12 @@ public class StatsTimerTask extends TimerTask {
 					}
 
 					float totalPercentError = (summedPercentError / (float) percentErrors.size() );
-					if(percentErrors.size() > mMostGuesses) {
-						mMostGuesses = percentErrors.size();
+					if(percentErrors.size() > mostGuesses) {
+						mostGuesses = percentErrors.size();
 						mMostGuessesUser = username;
 					}
-					if(mBestAccuracy < 0 || totalPercentError < mBestAccuracy) {
-						mBestAccuracy = totalPercentError;
+					if(bestAccuracy < 0 || totalPercentError < bestAccuracy) {
+						bestAccuracy = totalPercentError;
 						mMostAccurateUser = username;
 					}
 					StatsUser user = new StatsUser();
