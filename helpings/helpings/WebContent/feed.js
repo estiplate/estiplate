@@ -58,7 +58,17 @@ function addNewPost(postInfo) {
 		tagDiv.style.display = "none";
 		tagTwoDiv.style.display = "none";
 	}
-	newpost.querySelector("#username").innerHTML = post.username;
+	var username = post.username;
+	if ( post.mostaccurate ) {
+		username += " ☆";
+		newpost.querySelector("#username").title = "Most Accurate";
+	}
+	if ( post.mostguesses ) {
+		username += " ①";
+		newpost.querySelector("#username").title = "Most Guesses";
+	}
+
+	newpost.querySelector("#username").innerHTML = username;
 	newpost.querySelector("#username").href = "/helpings/users/"
 			+ post.username;
 	newpost.querySelector("#date").innerHTML = timeConverter(post.date);

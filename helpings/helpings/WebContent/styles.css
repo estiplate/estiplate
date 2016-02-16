@@ -18,7 +18,7 @@ button,input {
 	padding-bottom: 10px;
 }
 
-input,button,select,option,textarea,form,table {
+input,button,select,option,textarea,form {
 	width: 300px;
 }
 

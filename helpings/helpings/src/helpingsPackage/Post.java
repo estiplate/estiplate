@@ -13,6 +13,8 @@ public class Post {
 	private static final String ID = "rowid";
 	private static final String DATE = "date";
 	private static final String TAGS = "tags";
+	private static final String MOST_ACCURATE = "mostaccurate";
+	private static final String MOST_GUESSES = "mostguesses";
 
 	public String beforeImageUrl;
 	public String afterImageUrl;
@@ -49,6 +51,11 @@ public class Post {
 		try {
 			object.put(BEFORE_IMAGE_URL, beforeImageUrl);
 			object.put(AFTER_IMAGE_URL, afterImageUrl);
+			object.put(TITLE, title);
+			boolean mostAccurate = StatsTimerTask.isMostAccurate(username);
+			boolean mostGuesses = StatsTimerTask.mMostGuessesUser(username);
+			object.put(MOST_ACCURATE, mostAccurate);
+			object.put(MOST_GUESSES, mostGuesses);
 			object.put(TITLE, title);
 			object.put(USERNAME, username);
 			object.put(ID, id);

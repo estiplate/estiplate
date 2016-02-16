@@ -16,12 +16,15 @@ public class HelpingsDatabase
 	static final String CREATE_USER_TABLE = "create table if not exists users (username string, email string, salt string, hash string, token string)";
 	static final String CREATE_USER = "insert into users (username,email,salt,hash,token) values (?,?,?,?,?)";
 	static final String GET_USER = "select * from users where username=?";
+	static final String GET_USERS = "select * from users";
 	static final String GET_USER_BY_EMAIL = "select * from users where email=?";
 	static final String GET_USER_BY_TOKEN = "select * from users where token=?";
 	static final String UPDATE_USER_TOKEN = "update users set token=? where email=?";
 	static final String CREATE_POST_TABLE = "create table if not exists posts (rowid integer primary key autoincrement, username string, title string, beforeimage string, afterimage string, calories int, guesses int, date int, tags string)";
 	static final String CREATE_POST = "insert into posts (username, title, beforeimage, afterimage, calories, guesses, date, tags) values (?,?,?,?,?,?,?,?)";
 	static final String LAST_POST = "select last_insert_rowid() from posts";
+	static final String GET_POSTS = "select rowid, username, title, beforeimage, afterimage, date, tags from posts;";
+	static final String GET_POSTS_SINCE = "select rowid, username, title, beforeimage, afterimage, date, tags from posts where date > ?;";
 	static final String GET_POSTS_IN_RANGE = "select rowid, username, title, beforeimage, afterimage, date, tags from posts order by rowid desc limit ? offset ?;";
 	static final String GET_USER_POSTS_IN_RANGE = "select rowid, username, title, beforeimage, afterimage, date, tags from posts where username=? order by rowid desc limit ? offset ?;";
 	static final String CREATE_GUESS_TABLE = "create table if not exists guesses (post int, username string, calories int)";
@@ -258,6 +261,88 @@ public class HelpingsDatabase
 			closeConnection(connection);
 		}
 		return posts;
+	}
+
+	public ArrayList<Post> getPostsSince(long date) throws NoSuchAlgorithmException{
+
+		ArrayList<Post> posts = new ArrayList<Post>();
+
+		Connection connection = null;
+		try
+		{
+			// create a database connection
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+			PreparedStatement statement = connection.prepareStatement(GET_POSTS_SINCE);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			statement.setLong(1, date);
+			ResultSet rs = statement.executeQuery();
+			while( rs.next() ) {
+				posts.add( Post.creatPost(rs) );
+			}	
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		return posts;
+	}
+
+	public ArrayList<Post> getPosts() throws NoSuchAlgorithmException{
+
+		ArrayList<Post> posts = new ArrayList<Post>();
+
+		Connection connection = null;
+		try
+		{
+			// create a database connection
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+			PreparedStatement statement = connection.prepareStatement(GET_POSTS);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			ResultSet rs = statement.executeQuery();
+			while( rs.next() ) {
+				posts.add( Post.creatPost(rs) );
+			}	
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		return posts;
+	}
+
+	public ArrayList<String> getUsers() throws NoSuchAlgorithmException{
+
+		ArrayList<String> users = new ArrayList<String>();
+
+		Connection connection = null;
+		try
+		{
+			// create a database connection
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+			PreparedStatement statement = connection.prepareStatement(GET_USERS);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			ResultSet rs = statement.executeQuery();
+			while( rs.next() ) {
+				users.add( rs.getString("username") );
+			}	
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		return users;
 	}
 
 	public ArrayList<Post> getUserPostsInRange(int offset, int limit, String username) throws NoSuchAlgorithmException{
