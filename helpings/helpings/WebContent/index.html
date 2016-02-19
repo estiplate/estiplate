@@ -1,73 +1,92 @@
 <html>
 <head>
+<title>ESTIPLATE</title>
 <link href='https://fonts.googleapis.com/css?family=Varela+Round'
 	rel='stylesheet' type='text/css'>
-<meta name="viewport"
-	content="width=device-width, initial-scale=1.0, user-scalable=no" />
-<link rel="stylesheet" type="text/css" href="styles.css">
-<script type="text/javascript" charset="utf-8" src="login.js"></script>
-<script type="text/javascript" charset="utf-8" src="utils.js"></script>
-<script>
-	window.onload = function() {
-
-		var token = getCookie("token");
-		if (token != undefined && token != "") {
-			window.location = "/helpings/feed";
-		}
-		var username = getCookie("username");
-		if (username != undefined && username != "") {
-			gLogin = true;
-		}
-		var type = getCookie("type");
-		if (type != null) {
-			if (type === 'login') {
-				userLogin();
-			} else {
-				userSignup();
-			}
-		} else {
-			userLogin();
-		}
-	};
-	
-	function userLogin(){
-		document.getElementById("userForm").username.style.display = 'none';
-		document.getElementById("submitbutton").value = "Login";
-		document.getElementById("toggleLoginButton").innerHTML = "Sign Up";
-		gLogin = true;
-	}
-
-	function userSignup(){
-		document.getElementById("userForm").username.style.display = '';
-		document.getElementById("submitbutton").value = "Sign Up";
-		document.getElementById("toggleLoginButton").innerHTML = "Login";
-		gLogin = false;
-	}
-
-	function toggleLogin() {
-		if (gLogin) {
-			userSignup();
-		} else {
-			userLogin();
-		}
-	}
-</script>
+<link rel="stylesheet" type="text/css" href="/feed.css">
+<script type="text/javascript" charset="utf-8" src="/exif.js"></script>
+<script type="text/javascript" charset="utf-8" src="/feed.js"></script>
+<script type="text/javascript" charset="utf-8" src="/utils.js"></script>
+<meta name="viewport" content="width=device-width">
+<link rel="icon" type="image/png" href="plate.png">
 </head>
 <body>
-	<button type="button" id="toggleLoginButton" style="width:100px; margin-left: 20px;" onclick="toggleLogin()">Log in</button>
-
-	<div id="user">
-		<h1>ESTIPLATE</h1>
-		<form name="userForm" id="userForm" onsubmit="return userAction()">
-			<input class="loginform" type="email" name="email" placeholder="Email Address"> <br><br>
-			<input class="loginform" type="password" name="password" placeholder="Password"> <br><br>
-			<input class="loginform" type="text" name="username" placeholder="Username"> <br>
-			<input type="submit" name="send" id="submitbutton" value="Register" />
-		</form>
-
+	<div id="header">
+		<a href="javascript:window.scrollTo(0, 0);" class="pagetitle" style="margin-left: 20px; color: #000000;">ESTIPLATE</a>
+		<span style="float: right; margin-right: 20px; margin-top: 10px;">
+		<a href="/stats.jsp" style="margin-right: 10px;">&#x2606;</a>
+		<a href="javascript:void(0)" id="postbutton" >Upload</a>
+		</span>
 	</div>
-	<div id="message" style="display: none">
-		<h3 id="messageText"></h3>
-		<button type="button" onclick="clearMessage()">Done</button>
+
+	<div id="cover"></div>
+	<div style="width: 100%; position: absolute;">
+	<div id="uploadContainer">
+	<div id="uploadOverlay"><img src="loader.gif" style="margin: 135px;"></div>
+	<div id="uploadScreen"> 
+	<a href="javascript:cancelUpload()" class="cancel">&times;</a>
+	<canvas id="preview" class="preview" width="600" height="600"></canvas>
+	<br>
+	<form><textarea id="titleinput" style="width: 100%;"></textarea></form>	
+	<div id="tags" style="padding-top: 10px; padding-bottom:10px;"><span class="tagtitle">Tags:</span></div>
+	<form><input type="text" onKeyPress="return addTag(event)" id="addtag" placeholder="Add a tag and press enter" style="width: 100%;"></form>
+	<button id="uploadfile" onclick="addTagsAndSubmit()">Post Helping</button></div>
+	<br>
 	</div>
-</html>
+	</div>
+	
+	<form action="upload" method="post" enctype="multipart/form-data" id="uploadform" style="display: none;">
+	<input type="file" name="file" size="50" id="uploadinput" accept="image/*"
+			onchange="readURL(this);" /> </form>
+	<div class="post" id="templatepost" style="display: none;">
+		<div class="card" id="card" onclick="onCardClick(this)">
+			<div class="front face" style="overflow: scroll;">
+				<div class="cardcontent">
+					<img src="" class="foodPic" id="beforepic"> <br> 
+					<span id="title"> </span> <br>
+					<div id="tags"> </div>
+					<span class="postmetadata">
+					<span class="userlabel">Posted by </span>
+					<a class="username" id="username"></a> at <span class="date" id="date"></span></span>
+					<form class="calorieform" id="calform" onsubmit="return sendGuess(this)">
+						<input type="number" name="calories" placeholder="Estimate"
+							autocomplete="off"
+							style="display: inline; width: 120px; margin-right: 10px;">
+						<input type="submit" value="Enter" style="display: inline; width: 100px;"><br>
+					</form>
+				</div>
+				<img id="deletepost" src="/close.png" style="position: absolute; bottom: 5px; right: 5px; width: 32px; height: 32px; display: none;">
+			</div>
+			<div class="back face" style="overflow: scroll;">
+				<div class="cardcontent">
+					<img src="" style="display: inline; float: left; margin-right: 10px;" class="foodThumb" id="beforethumb">
+					<div id="postinfo" style="display: inline; text-align: left">
+						<span class="posttitle" id="titletwo"> </span> <br>
+						<div id="tagstwo"> </div>
+						<span class="posttitle" id="calories"></span> 
+						<span class="posttitle" id="guesscount"></span><br> 
+						<span class="posttitle" id="guess"></span>
+						<span class="posttitle" id="guessaccuracy" style="margin-left: 10px;"></span><br>
+					</div>
+					<div id="commentarea">
+						<div class="comments_wrapper" id="comments"></div>
+						<textarea id="commentinput" style="width: 100%;"></textarea>
+						<button id="commentbutton" style="width: 220px; margin-top: 10px;"
+							onclick="postComment(this)">Add Comment</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="comment" id="templatecomment" style="display: none; clear: left; text-align: left;">
+		<div class="comment_text" id="commenttext"></div>
+		<div class="comment_metadata" id="commentmetadata"></div>
+	</div>
+	<div id="posts" style="clear: left; text-align: center; padding-top: 60;"></div>
+	<p>
+	<a id="nextbutton" href="javascript:void(0)" onclick="nextPage();">Next</a>
+	<a id="logout" style="float: right; margin-right: 100px;" href="javascript:void(0)" onclick="logout();">Logout</a>
+	<p>
+	<a href="/upload.html" style="margin: 10px;">Old Upload</a>	
+</body>
+<html>

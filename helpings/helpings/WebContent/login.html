@@ -1,0 +1,74 @@
+<html>
+<head>
+<link href='https://fonts.googleapis.com/css?family=Varela+Round'
+	rel='stylesheet' type='text/css'>
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<link rel="stylesheet" type="text/css" href="styles.css">
+<script type="text/javascript" charset="utf-8" src="login.js"></script>
+<script type="text/javascript" charset="utf-8" src="utils.js"></script>
+<script>
+	window.onload = function() {
+
+		var token = getCookie("token");
+		if (token != undefined && token != "") {
+			window.location = "/feed";
+		}
+		var username = getCookie("username");
+		if (username != undefined && username != "") {
+			gLogin = true;
+		}
+		var type = getCookie("type");
+		if (type != null) {
+			if (type === 'login') {
+				userLogin();
+			} else {
+				userSignup();
+			}
+		} else {
+			userLogin();
+		}
+	};
+	
+	function userLogin(){
+		document.getElementById("userForm").username.style.display = 'none';
+		document.getElementById("submitbutton").value = "Login";
+		document.getElementById("toggleLoginButton").innerHTML = "Sign Up";
+		gLogin = true;
+	}
+
+	function userSignup(){
+		document.getElementById("userForm").username.style.display = '';
+		document.getElementById("submitbutton").value = "Sign Up";
+		document.getElementById("toggleLoginButton").innerHTML = "Login";
+		gLogin = false;
+	}
+
+	function toggleLogin() {
+		if (gLogin) {
+			userSignup();
+		} else {
+			userLogin();
+		}
+	}
+</script>
+<link rel="icon" type="image/png" href="plate.png">
+</head>
+<body>
+	<button type="button" id="toggleLoginButton" style="width:100px; margin-left: 20px;" onclick="toggleLogin()">Log in</button>
+
+	<div id="user">
+		<h1>ESTIPLATE</h1>
+		<form name="userForm" id="userForm" onsubmit="return userAction()">
+			<input class="loginform" type="email" name="email" placeholder="Email Address"> <br><br>
+			<input class="loginform" type="password" name="password" placeholder="Password"> <br><br>
+			<input class="loginform" type="text" name="username" placeholder="Username"> <br>
+			<input type="submit" name="send" id="submitbutton" value="Register" />
+		</form>
+
+	</div>
+	<div id="message" style="display: none">
+		<h3 id="messageText"></h3>
+		<button type="button" onclick="clearMessage()">Done</button>
+	</div>
+</html>

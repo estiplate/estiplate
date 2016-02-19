@@ -15,7 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-@WebServlet(urlPatterns = {"/feed/*", "/users/*", "/tag/*"}, asyncSupported = true)
+@WebServlet(urlPatterns = {"","/feed/*", "/users/*", "/tag/*"}, asyncSupported = true)
 public class FeedServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
@@ -24,7 +24,6 @@ public class FeedServlet extends HttpServlet {
 	private static final String FILTER_USERS = "users";
 	private static final String FILTER_TAG = "tag";
 	private static final String FILTER_FEED = "feed";
-	private static final String HELPINGS_PREFIX = "/helpings";
 	private static final int PLATES_PER_PAGE = 18;
 	private static final int INITIAL_COMMENTS = 10;
 
@@ -44,9 +43,6 @@ public class FeedServlet extends HttpServlet {
 					throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
 		String uri = request.getRequestURI();
-		if( uri.startsWith( HELPINGS_PREFIX ) ) {
-			uri = uri.substring(HELPINGS_PREFIX.length() , uri.length());
-		}
 		String[] pathSegments = uri.split("/");
 		String filter = "";
 		String filterParam = "";
@@ -163,7 +159,7 @@ public class FeedServlet extends HttpServlet {
 			}
 		} else {
 			response.setContentType("text/html");
-			RequestDispatcher view = request.getRequestDispatcher("/feed.html");
+			RequestDispatcher view = request.getRequestDispatcher("/index.html");
 			view.forward(request, response);
 		}
 	}

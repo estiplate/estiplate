@@ -8,7 +8,7 @@
 	content="width=device-width, initial-scale=1.0, user-scalable=no" />
 <link rel="stylesheet" type="text/css" href="styles.css">
 <link rel="stylesheet" type="text/css" href="upload.css">
-<script type="text/javascript" charset="utf-8" src="/helpings/utils.js"></script>
+<script type="text/javascript" charset="utf-8" src="/utils.js"></script>
 <script type="text/javascript">
 	window.onload = function() {
 		document.getElementById("name_input").value = getCookie("username");
@@ -19,7 +19,7 @@
 		};
 		var token = getCookie("token");
 		if (token == undefined || token == "") {
-			window.location = "/helpings/";
+			window.location = "/login.html";
 		}
 	}
 
@@ -83,6 +83,7 @@
 	}
 	
 </script>
+<link rel="icon" type="image/png" href="plate.png">
 </head>
 <body>
 	<div id="header">

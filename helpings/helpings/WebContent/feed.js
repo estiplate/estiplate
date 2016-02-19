@@ -10,20 +10,25 @@ window.onload = function() {
 	gToken = getCookie("token");
 	if ( gToken == undefined || gToken.length == 0) {
 		document.getElementById("postbutton").innerHTML = "Login";
+		document.getElementById("postbutton").href = "/login.html";
+	} else {
+		document.getElementById('postbutton').onclick = function() {
+			document.getElementById('uploadinput').click();
+		};
 	}
-	document.getElementById('postbutton').onclick = function() {
-		document.getElementById('uploadinput').click();
-	};
 	sendFeedRequest();
 }
 
 function logout() {
 	setCookie("token", "");
-	window.location = "/helpings/";
+	window.location = "/";
 }
 
 function nextPage() {
-	var url = window.location.href;
+	var url = window.location.pathname;
+	if ( url == "/" ) {
+		url = "/feed"
+	}
 	var lastSlash = url.lastIndexOf('/');
 	var lastSegment = url.substring(lastSlash + 1, url.length);
 	if ( !isNaN(lastSegment) ) {
@@ -31,7 +36,7 @@ function nextPage() {
 		var base = url.substring(0,lastSlash);
 		window.location = base + "/" +  nextPage;
 	} else {
-		window.location = window.location.href + "/2";
+		window.location = url + "/2";
 	}
 	
 }
@@ -69,7 +74,7 @@ function addNewPost(postInfo) {
 	}
 
 	newpost.querySelector("#username").innerHTML = username;
-	newpost.querySelector("#username").href = "/helpings/users/"
+	newpost.querySelector("#username").href = "/users/"
 			+ post.username;
 	newpost.querySelector("#date").innerHTML = timeConverter(post.date);
 	if ( post.username == gUsername ) {
@@ -100,7 +105,7 @@ function addTags( tagDiv, tagList ) {
 	for (var i = 0; i < tagList.length; i++ ) {
 		var tag = tagList[i];
 		var tagSpan = document.createElement('a')
-		tagSpan.href = "/helpings/tag/" + tag;
+		tagSpan.href = "/tag/" + tag;
 		tagSpan.innerHTML = tag;
 		tagSpan.className = "tag";
 		tagDiv.appendChild(tagSpan);
@@ -192,13 +197,11 @@ function sendFeedRequest() {
 		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
 	}
 
-	var url = window.location.href;
-	if (location.search.lastIndexOf('?') > 0) {
-		url = url + "&";
-	} else {
-		url = url + "?";
+	var url = window.location.pathname;
+	if ( url == "/" ) {
+		url = "/feed";
 	}
-	url = url + "json=true&username=" + gUsername + "&token=" + gToken;
+	url = url + "?json=true&username=" + gUsername + "&token=" + gToken;
 	console.log(url);
 	xmlhttp.open("GET", url, true);
 	xmlhttp.onreadystatechange = handleFeedResponse;
@@ -267,7 +270,7 @@ function sendGuess(input) {
 	params.token = getCookie("token");
 	var paramString = JSON.stringify(params);
 
-	xmlhttp.open("POST", "/helpings/guess", true);
+	xmlhttp.open("POST", "/guess", true);
 	xmlhttp.onreadystatechange = handleGuessResponse;
 
 	// Send the proper header information along with the request
@@ -333,7 +336,7 @@ function postComment(button) {
 	params.comment = comment;
 	var paramString = JSON.stringify(params);
 
-	xmlhttp.open("POST", "/helpings/comment", true);
+	xmlhttp.open("POST", "/comment", true);
 	xmlhttp.onreadystatechange = handleCommentResponse;
 
 	// Send the proper header information along with the request
@@ -413,7 +416,7 @@ function deletePost(post_id) {
 	params.token = getCookie("token");
 	var paramString = JSON.stringify(params);
 
-	xmlhttp.open("POST", "/helpings/delete", true);
+	xmlhttp.open("POST", "/delete", true);
 	xmlhttp.onreadystatechange = handleDeleteResponse;
 
 	// Send the proper header information along with the request
@@ -484,8 +487,8 @@ function readURL(input) {
 		});
 
 		reader.readAsDataURL(input.files[0]);
+		document.getElementById("uploadContainer").style.display = 'block';
 		document.getElementById("cover").style.display = 'block';
-		document.getElementById("uploadScreen").style.display = 'block';
 	}
 
 }
@@ -540,7 +543,7 @@ function fixRotation( ctx, orientation, imageSize ) {
 }
 function cancelUpload() {
 	document.getElementById("cover").style.display = 'none';
-	document.getElementById("uploadScreen").style.display = 'none';
+	document.getElementById("uploadContainer").style.display = 'none';
 }
 
 function addTag(e) {

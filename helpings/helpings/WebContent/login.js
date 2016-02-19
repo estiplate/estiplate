@@ -45,7 +45,7 @@ function login() {
 				setCookie("token", jsonResp.token);
 				setCookie("username", jsonResp.username);
 				document.getElementById("user").style.display = 'none';
-				location.href='/helpings/feed';
+				location.href='/feed';
 			}
 		}
 	};
