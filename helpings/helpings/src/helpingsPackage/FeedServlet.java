@@ -42,6 +42,9 @@ public class FeedServlet extends HttpServlet {
 			HttpServletResponse response)
 					throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+		response.setHeader("Pragma", "no-cache");
+
 		String uri = request.getRequestURI();
 		String[] pathSegments = uri.split("/");
 		String filter = "";

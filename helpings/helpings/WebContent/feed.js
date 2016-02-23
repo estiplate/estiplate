@@ -1,7 +1,6 @@
 //Keep track of how much data we have received from the server
 var gResponsePtr = 0;
 var gInput;
-var gLogin = false;
 var gUsername = "";
 var gToken = "";
 
@@ -9,8 +8,9 @@ window.onload = function() {
 
 	gToken = getCookie("token");
 	if ( gToken == undefined || gToken.length == 0) {
-		document.getElementById("postbutton").innerHTML = "Login";
+		document.getElementById("postbutton").innerHTML = "Sign Up";
 		document.getElementById("postbutton").href = "/login.html";
+		document.getElementById("logout").style.display = "none";
 	} else {
 		document.getElementById('postbutton').onclick = function() {
 			document.getElementById('uploadinput').click();
@@ -81,7 +81,6 @@ function addNewPost(postInfo) {
 		newpost.querySelector("#deletepost").style.display = "block";
 	}
 	
-
 	var form = newpost.querySelector("#calform");
 	form.setAttribute("data_postid", post.rowid);
 	newpost.style.display = "";
@@ -93,9 +92,6 @@ function addNewPost(postInfo) {
 		populateGuess( postInfo.average, postInfo.userguess, postInfo.guesscount, post.rowid);
 		addComments( postInfo.comments, post.rowid);
 	} else {
-		if ( gToken == undefined || gToken.length == 0) { 
-			showGuessInput(post.rowid, false);
-		}
 		showComments(post.rowid, false);
 		showGuess(post.rowid, false);
 	}
@@ -246,6 +242,10 @@ function handleFeedResponse() {
 
 function sendGuess(input) {
 
+	if ( gToken == undefined || gToken.length == 0) {
+		alert("Please create an account to guess!");
+		return;
+	}
 
 	gInput = input;
 	console.log(input);

@@ -14,6 +14,7 @@
 	<div id="header">
 		<a href="javascript:window.scrollTo(0, 0);" class="pagetitle" style="margin-left: 20px; color: #000000;">ESTIPLATE</a>
 		<span style="float: right; margin-right: 20px; margin-top: 10px;">
+		<img src="/user.png" style="height: 32px; width: 32px;  vertical-align: middle; display: none">
 		<a href="/stats.jsp" style="margin-right: 10px;">&#x2606;</a>
 		<a href="javascript:void(0)" id="postbutton" >Upload</a>
 		</span>
@@ -49,7 +50,7 @@
 					<span class="userlabel">Posted by </span>
 					<a class="username" id="username"></a> at <span class="date" id="date"></span></span>
 					<form class="calorieform" id="calform" onsubmit="return sendGuess(this)">
-						<input type="number" name="calories" placeholder="Estimate"
+						<input type="number" name="calories" placeholder="Calories"
 							autocomplete="off"
 							style="display: inline; width: 120px; margin-right: 10px;">
 						<input type="submit" value="Enter" style="display: inline; width: 100px;"><br>
@@ -87,6 +88,7 @@
 	<a id="nextbutton" href="javascript:void(0)" onclick="nextPage();">Next</a>
 	<a id="logout" style="float: right; margin-right: 100px;" href="javascript:void(0)" onclick="logout();">Logout</a>
 	<p>
-	<a href="/upload.html" style="margin: 10px;">Old Upload</a>	
+	<a href="/upload.html" style="float: left; margin: 10px;">Old Upload</a>	
+	<a href="mailto:feedback@estiplate.com" style="float: right; margin: 10px;">Feedback</a>	
 </body>
 <html>

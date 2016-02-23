@@ -77,6 +77,31 @@ public class UserServlet extends HttpServlet {
 		}
 	}
 
+	private void handleChangePassword(JSONObject requestJSON, HttpServletResponse response) throws IOException{
+		String email = (String) requestJSON.optString("email");
+		String password = (String) requestJSON.optString("password");
+		String new_password = (String) requestJSON.optString("new_password");
+		try {
+			User p = mDatabase.changePassword(email, password, new_password);
+			if ( p != null && p.token != null){
+				PrintWriter out = response.getWriter();
+				try {
+					JSONObject responseObject = new JSONObject();
+					responseObject.put("token", p.token);
+					responseObject.put("username", p.name);
+					out.write(responseObject.toString());
+				} catch (JSONException  e){
+				}
+				out.flush();
+				out.flush();
+			} else {
+				response.sendError(401);
+			}
+		} catch (NoSuchAlgorithmException e){
+
+		}
+	}
+
 	private void handleRequestToken(JSONObject requestJSON, HttpServletResponse response) throws IOException{
 
 		String token = (String) requestJSON.optString("token");
@@ -122,6 +147,10 @@ public class UserServlet extends HttpServlet {
 		} else if ( command.equals("request_token")) {
 
 			handleRequestToken(requestJSON, response);
+
+		} else if ( command.equals("change_password")) {
+
+			handleChangePassword(requestJSON, response);
 
 		}
 	}

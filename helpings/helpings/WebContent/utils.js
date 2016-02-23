@@ -70,11 +70,28 @@ function timeConverter(millis) {
 	var month = months[a.getMonth()];
 	var date = a.getDate();
 	var hour = a.getHours();
+	var pm = false;
+	if ( hour > 12 ) {
+		hour -= 12;
+		pm = true;
+	}
+	if ( hour == 0 ) {
+		hour = 12;
+	}
 	var min = a.getMinutes();
+	min = min < 10 ? ('0' + min) : min;
 	var sec = a.getSeconds();
-	var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':'
-			+ sec;
-	return time;
+	var time = ' ' + hour + ':' + min;
+	if ( pm ) {
+		time = time + " PM";
+	} else {
+		time = time + " AM";
+	}
+	var date = month + ' ' + date;
+	if ( year != new Date().getFullYear() ) {
+		date += ' ' +  year;
+	}
+	return time + " " + date;
 }
 
 function mobileCheck() {

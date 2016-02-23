@@ -19,7 +19,7 @@ public class HelpingsDatabase
 	static final String GET_USERS = "select * from users";
 	static final String GET_USER_BY_EMAIL = "select * from users where email=?";
 	static final String GET_USER_BY_TOKEN = "select * from users where token=?";
-	static final String UPDATE_USER_TOKEN = "update users set token=? where email=?";
+	static final String UPDATE_USER_PASSWORD = "update users set token=?, hash=? where email=?";
 	static final String CREATE_POST_TABLE = "create table if not exists posts (rowid integer primary key autoincrement, username string, title string, beforeimage string, afterimage string, calories int, guesses int, date int, tags string)";
 	static final String CREATE_POST = "insert into posts (username, title, beforeimage, afterimage, calories, guesses, date, tags) values (?,?,?,?,?,?,?,?)";
 	static final String LAST_POST = "select last_insert_rowid() from posts";
@@ -123,6 +123,54 @@ public class HelpingsDatabase
 					statement.setString(1, token);
 					statement.setString(2, email);
 					statement.executeUpdate();*/
+					User user = new User();
+					user.email = email;
+					user.token = token;
+					user.name = name;
+					return user;
+				} 
+			}	
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		return null;
+	}
+
+	public User changePassword(String email, String password, String new_password) throws NoSuchAlgorithmException{
+
+		Connection connection = null;
+		try
+		{
+			// create a database connection
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+			PreparedStatement statement = connection.prepareStatement(GET_USER_BY_EMAIL);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			statement.setString(1, email);
+			ResultSet rs = statement.executeQuery();
+			if(rs.next())
+			{
+				String hash = rs.getString("hash");
+				String salt = rs.getString("salt");
+				String name = rs.getString("username");
+				String token = rs.getString("token");
+
+				String calculatedHash = get_SHA_1_SecurePassword(salt,password);
+				if ( calculatedHash != null && calculatedHash.equals(hash) ) {
+					salt = getSalt();
+					token = getSalt();
+					hash = get_SHA_1_SecurePassword(salt,new_password);
+					statement = connection.prepareStatement(UPDATE_USER_PASSWORD);
+					statement.setQueryTimeout(30);  // set timeout to 30 sec.
+					statement.setString(1, token);
+					statement.setString(2, hash);
+					statement.setString(2, email);
+					statement.executeUpdate();
 					User user = new User();
 					user.email = email;
 					user.token = token;
