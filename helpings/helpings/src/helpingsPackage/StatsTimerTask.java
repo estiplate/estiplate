@@ -10,6 +10,7 @@ public class StatsTimerTask extends TimerTask {
 
 	private HelpingsDatabase mDatabase;
 	private static final long ONE_WEEK = 3600 * 24 * 7 * 1000;
+	private static final long TWO_WEEKS = ONE_WEEK * 2;
 	static private int mRuns = 0;
 	static private String mMostGuessesUser = "";
 	static private String mMostAccurateUser = "";
@@ -47,7 +48,7 @@ public class StatsTimerTask extends TimerTask {
 		Date date = new Date();
 		mUsers.clear();
 		try {
-			ArrayList<Post> posts = mDatabase.getPostsSince(date.getTime() -  ONE_WEEK );
+			ArrayList<Post> posts = mDatabase.getPostsSince(date.getTime() -  TWO_WEEKS );
 			ArrayList<Average> averages = mDatabase.getAveragesForPosts(posts);
 			ArrayList<String> usernames = mDatabase.getUsers();
 			int mostGuesses = 0;

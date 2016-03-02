@@ -197,7 +197,7 @@ function sendFeedRequest() {
 	if ( url == "/" ) {
 		url = "/feed";
 	}
-	url = url + "?json=true&username=" + gUsername + "&token=" + gToken;
+	url = url + "?json=true" + "&token=" + encodeURIComponent(gToken) + "&username=" + gUsername;
 	console.log(url);
 	xmlhttp.open("GET", url, true);
 	xmlhttp.onreadystatechange = handleFeedResponse;

@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class HelpingsDatabase
 {
@@ -19,7 +20,7 @@ public class HelpingsDatabase
 	static final String GET_USERS = "select * from users";
 	static final String GET_USER_BY_EMAIL = "select * from users where email=?";
 	static final String GET_USER_BY_TOKEN = "select * from users where token=?";
-	static final String UPDATE_USER_PASSWORD = "update users set token=?, hash=? where email=?";
+	static final String UPDATE_USER_PASSWORD = "update users set token=?, hash=?, salt=? where username=?";
 	static final String CREATE_POST_TABLE = "create table if not exists posts (rowid integer primary key autoincrement, username string, title string, beforeimage string, afterimage string, calories int, guesses int, date int, tags string)";
 	static final String CREATE_POST = "insert into posts (username, title, beforeimage, afterimage, calories, guesses, date, tags) values (?,?,?,?,?,?,?,?)";
 	static final String LAST_POST = "select last_insert_rowid() from posts";
@@ -70,32 +71,6 @@ public class HelpingsDatabase
 		}
 	}
 
-	public boolean userExists(String username){
-		Connection connection = null;
-		try
-		{
-			// create a database connection
-			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
-			PreparedStatement statement = connection.prepareStatement(GET_USER);
-			statement.setQueryTimeout(30);  // set timeout to 30 sec.
-			statement.setString(1, username);
-			ResultSet rs = statement.executeQuery();
-			if(rs.next())
-			{
-				return true;
-			}	
-		}
-		catch(SQLException e)
-		{
-			System.err.println(e.getMessage());
-		}
-		finally
-		{
-			closeConnection(connection);
-		}
-		return false;
-	}
-
 	public User login(String email, String password) throws NoSuchAlgorithmException{
 
 		Connection connection = null;
@@ -142,22 +117,22 @@ public class HelpingsDatabase
 		return null;
 	}
 
-	public User changePassword(String email, String password, String new_password) throws NoSuchAlgorithmException{
+	public User changePassword(String username, String password, String new_password) throws NoSuchAlgorithmException{
 
 		Connection connection = null;
 		try
 		{
 			// create a database connection
 			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
-			PreparedStatement statement = connection.prepareStatement(GET_USER_BY_EMAIL);
+			PreparedStatement statement = connection.prepareStatement(GET_USER);
 			statement.setQueryTimeout(30);  // set timeout to 30 sec.
-			statement.setString(1, email);
+			statement.setString(1, username);
 			ResultSet rs = statement.executeQuery();
 			if(rs.next())
 			{
 				String hash = rs.getString("hash");
 				String salt = rs.getString("salt");
-				String name = rs.getString("username");
+				String email = rs.getString("email");
 				String token = rs.getString("token");
 
 				String calculatedHash = get_SHA_1_SecurePassword(salt,password);
@@ -169,12 +144,13 @@ public class HelpingsDatabase
 					statement.setQueryTimeout(30);  // set timeout to 30 sec.
 					statement.setString(1, token);
 					statement.setString(2, hash);
-					statement.setString(2, email);
+					statement.setString(3, salt);
+					statement.setString(4, username);
 					statement.executeUpdate();
 					User user = new User();
 					user.email = email;
 					user.token = token;
-					user.name = name;
+					user.name = username;
 					return user;
 				} 
 			}	
@@ -211,7 +187,7 @@ public class HelpingsDatabase
 
 			statement = connection.prepareStatement(GET_USER_BY_EMAIL);
 			statement.setQueryTimeout(30);  // set timeout to 30 sec.
-			statement.setString(1, username);
+			statement.setString(1, email);
 			rs = statement.executeQuery();
 			if( rs.next() ){
 				return null;
@@ -748,9 +724,11 @@ public class HelpingsDatabase
 		String generatedPassword = null;
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-1");
+			// Should use Base64 decode here.
 			md.update(salt.getBytes());
 			byte[] bytes = md.digest(passwordToHash.getBytes());
 			StringBuilder sb = new StringBuilder();
+			// Should use Base64 encode here.
 			for(int i=0; i< bytes.length ;i++)
 			{
 				sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
@@ -771,6 +749,7 @@ public class HelpingsDatabase
 		byte[] salt = new byte[16];
 		sr.nextBytes(salt);
 		return salt.toString();
+//		return Base64.getEncoder().encodeToString(salt);
 	}
 
 }

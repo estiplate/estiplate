@@ -150,6 +150,23 @@ public class UploadServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 
+		boolean success = false;
+		String name = "";
+		if (token != null && token.length() > 0) {
+			name = mDatabase.getUserForToken(token);
+			if (name != null && name.length() > 0) {
+				if (name.equals(username)) {
+					success = true;
+				}
+			}
+		}
+		if (!success) {
+			PrintWriter out = response.getWriter();
+			out.println("WRONG! " + name + " " + token);
+			out.flush();
+			return;
+		}
+
 		File imagefile = new File(UPLOAD_PATH + filename);
 		int rotation = getRotation(imagefile);
 
@@ -167,24 +184,6 @@ public class UploadServlet extends HttpServlet {
 		} catch (IOException e) {
 			PrintWriter out = response.getWriter();
 			out.println("WRONG! " + e.getMessage());
-			out.flush();
-			return;
-		}
-
-		// FIXME this needs to come *before* we do the file upload
-		boolean success = false;
-		String name = "";
-		if (token != null && token.length() > 0) {
-			name = mDatabase.getUserForToken(token);
-			if (name != null && name.length() > 0) {
-				if (name.equals(username)) {
-					success = true;
-				}
-			}
-		}
-		if (!success) {
-			PrintWriter out = response.getWriter();
-			out.println("WRONG! " + name + " " + token);
 			out.flush();
 			return;
 		}

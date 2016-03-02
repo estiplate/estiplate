@@ -13,12 +13,12 @@ function login() {
 
 	var email = document.forms["userForm"]["email"].value;
 	if (email == null || email == "") {
-		alert("Email cannot be empty");
+		alert("Please enter your email address");
 		return false;
 	}
 	var password = document.forms["userForm"]["password"].value;
 	if (password == null || password == "") {
-		alert("Password cannot be empty");
+		alert("Please enter your password");
 		return false;
 	}
 
@@ -68,6 +68,10 @@ function createUser() {
 	var password = document.forms["userForm"]["password"].value;
 	if (password == null || password == "") {
 		alert("Password cannot be empty");
+		return false;
+	}
+
+	if ( !testPassword(password) ) {
 		return false;
 	}
 

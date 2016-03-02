@@ -12,7 +12,7 @@
 
 	<div id="score">
 		<h1><a href="/">ESTIPLATE</a></h1>
-		<h2>Leaderboard - Past Week</h2>
+		<h2>Leaderboard - Past Two Weeks</h2>
 		<h3>Average Error Percentage</h3>
 		<table>
 		<tr>

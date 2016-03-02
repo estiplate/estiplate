@@ -37,11 +37,13 @@ function getCookies()
 
 	for(var i=0; i<ca.length; i++) 
 	{
-		var c = ca[i].split('=');
-		var obj = new Object;
-		obj.key = c[0];
-		obj.value = c[1];
-		gCookies.push(obj);
+		var index = ca[i].indexOf('=');
+		if ( index > 0 ) {
+			var obj = new Object;
+			obj.key = ca[i].substring(1, index);
+			obj.value = ca[i].substring(index + 1, ca[i].length);
+			gCookies.push(obj);
+		}
 	}
 }
 
@@ -60,6 +62,14 @@ function saveCookies(days){
 		cookieString = gCookies[i].key + '=' + gCookies[i].value + '; expires=' + date.toUTCString() +  '; path=/';
 		document.cookie=cookieString;
 	}
+}
+
+function testPassword(password){
+	if ( password.length < 8 ) {
+		alert("Your password must be at least eight characters.");
+		return false;
+	}
+	return true;
 }
 
 function timeConverter(millis) {

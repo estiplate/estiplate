@@ -78,20 +78,14 @@ public class UserServlet extends HttpServlet {
 	}
 
 	private void handleChangePassword(JSONObject requestJSON, HttpServletResponse response) throws IOException{
-		String email = (String) requestJSON.optString("email");
+		String username = (String) requestJSON.optString("username");
 		String password = (String) requestJSON.optString("password");
 		String new_password = (String) requestJSON.optString("new_password");
 		try {
-			User p = mDatabase.changePassword(email, password, new_password);
+			User p = mDatabase.changePassword(username, password, new_password);
 			if ( p != null && p.token != null){
 				PrintWriter out = response.getWriter();
-				try {
-					JSONObject responseObject = new JSONObject();
-					responseObject.put("token", p.token);
-					responseObject.put("username", p.name);
-					out.write(responseObject.toString());
-				} catch (JSONException  e){
-				}
+				out.write(p.token);
 				out.flush();
 				out.flush();
 			} else {
