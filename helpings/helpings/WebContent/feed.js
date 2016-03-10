@@ -12,10 +12,13 @@ window.onload = function() {
 		document.getElementById("postbutton").href = "/login.html";
 		document.getElementById("logout").style.display = "none";
 	} else {
+		gUsername = getCookie("username");
+		document.getElementById("username").innerHTML = gUsername;
 		document.getElementById('postbutton').onclick = function() {
 			document.getElementById('uploadinput').click();
 		};
 	}
+
 	sendFeedRequest();
 }
 
@@ -499,25 +502,35 @@ function loadImage(){
 	EXIF.getData(img, function() {
 		orientation = EXIF.getTag(img, "Orientation");
     });
-	var myCanvas = document.getElementById('preview');
-	var ctx = myCanvas.getContext('2d');
-	ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
-	var imageSize = myCanvas.width;
-	var h = img.height;
-	var w = img.width;
-	var unscaledSize;
-	var x = 0;
-	var y = 0;
-	if ( w > h ) {
-		x = ( w - h ) / 2;
-		unscaledSize = h;
-	} else if ( h > w ) {
-		y = ( h - w ) / 2;
-		unscaledSize = w;
+	
+    var myCanvas = document.getElementById('preview');
+
+	if((navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i))) {
+		// Fix older iphone bug
+		var mpImg = new MegaPixImage(img);
+		mpImg.render(myCanvas, { maxWidth: myCanvas.width, maxHeight: myCanvas.height, orientation: orientation });
+	} else {
+		// This crops as well as scales.  The iPhone version uploads a larger image and
+		// crops on the server
+		var ctx = myCanvas.getContext('2d');
+		ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
+	    var imageSize = myCanvas.width;
+		var h = img.height;
+		var w = img.width;
+		var unscaledSize;
+		var x = 0;
+		var y = 0;
+		if ( w > h ) {
+			x = ( w - h ) / 2;
+			unscaledSize = h;
+		} else if ( h > w ) {
+			y = ( h - w ) / 2;
+			unscaledSize = w;
+		}
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		fixRotation(ctx, orientation, imageSize);
+		ctx.drawImage(img, x, y, unscaledSize, unscaledSize, 0, 0, imageSize, imageSize);
 	}
-	ctx.setTransform(1, 0, 0, 1, 0, 0);
-	fixRotation(ctx, orientation, imageSize);
-	ctx.drawImage(img, x, y, unscaledSize, unscaledSize, 0, 0, imageSize, imageSize);
 	myCanvas.style.display = 'block';
 }
 

@@ -22,14 +22,13 @@ import org.json.JSONObject;
 public class StatsServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	static final long ONE_WEEK = 3600 * 24 * 7 * 1000;
-	static final long TEN_MINUTES = 10 * 60 * 1000;
+	static final long FIVE_MINUTES = 5 * 60 * 1000;
 	static StatsTimerTask sStatsTimerTask;
 
 	static {
 		Timer timer = new Timer();
 		sStatsTimerTask = new StatsTimerTask();
-		timer.schedule(sStatsTimerTask, 0, TEN_MINUTES);
+		timer.schedule(sStatsTimerTask, 0, FIVE_MINUTES);
 	}
 
 	@Override
