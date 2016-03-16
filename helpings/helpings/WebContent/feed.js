@@ -1,5 +1,3 @@
-//Keep track of how much data we have received from the server
-var gResponsePtr = 0;
 var gInput;
 var gUsername = "";
 var gToken = "";
@@ -213,33 +211,21 @@ function sendFeedRequest() {
 }
 
 function handleFeedResponse() {
-	var len = xmlhttp.responseText.length;
-	var xmlResp = xmlhttp.responseText.substring(gResponsePtr, len);
 
-	if (xmlhttp.readyState == 3) {
+	if (xmlhttp.readyState == 4) {
 
-		// Success! Reset retries
-		gRetryCount = 0;
-
-		// This is really kind of ugly. We keep feeding more data in and seeing
-		// if it parses sucessfully. When it does, we know we have a complete
-		// command
-		console.log(xmlResp);
-
-		var jsonResp = JSON.parse(xmlResp);
-		if (jsonResp == null) {
+		var jsonResp;
+		try {
+			jsonResp = JSON.parse(xmlhttp.responseText);
+		} catch (err){
+			console.log(err);
 			return;
 		}
-		console.log(jsonResp);
 		for (var i = 0; i < jsonResp.length; i++) {
 			var postInfo = jsonResp[i];
 			addNewPost(postInfo);
 			console.log(postInfo);
 		}
-		gResponsePtr = len;
-
-	} else if (xmlhttp.readyState == 4) {
-		gResponsePtr = 0;
 	}
 }
 
@@ -285,22 +271,16 @@ function sendGuess(input) {
 }
 
 function handleGuessResponse() {
-	var len = xmlhttp.responseText.length;
-	var xmlResp = xmlhttp.responseText.substring(gResponsePtr, len);
 
-	if (xmlhttp.readyState == 3) {
+	if (xmlhttp.readyState == 4) {
 
-		// Success! Reset retries
-		gRetryCount = 0;
-
-		// This is really kind of ugly. We keep feeding more data in and seeing
-		// if it parses sucessfully. When it does, we know we have a complete
-		// command
-		var jsonResp = JSON.parse(xmlResp);
-		if (jsonResp == null) {
+		var jsonResp;
+		try {
+			jsonResp = JSON.parse(xmlhttp.responseText);
+		} catch (err){
+			console.log(err);
 			return;
 		}
-		console.log(jsonResp);
 		var post = jsonResp.rowid;
 		populateGuess( jsonResp.average, jsonResp.userguess, jsonResp.guesscount, post);
 		showGuess(post, true);
@@ -308,10 +288,6 @@ function handleGuessResponse() {
 		showComments(post, true);
 
 		addComments(jsonResp.comments, post);
-		gResponsePtr = len;
-
-	} else if (xmlhttp.readyState == 4) {
-		gResponsePtr = 0;
 	}
 }
 
@@ -351,19 +327,14 @@ function postComment(button) {
 }
 
 function handleCommentResponse() {
-	var len = xmlhttp.responseText.length;
-	var xmlResp = xmlhttp.responseText.substring(gResponsePtr, len);
 
-	if (xmlhttp.readyState == 3) {
+	if (xmlhttp.readyState == 4) {
 
-		// Success! Reset retries
-		gRetryCount = 0;
-
-		// This is really kind of ugly. We keep feeding more data in and seeing
-		// if it parses sucessfully. When it does, we know we have a complete
-		// command
-		var jsonResp = JSON.parse(xmlResp);
-		if (jsonResp == null) {
+		var jsonResp;
+		try {
+			jsonResp = JSON.parse(xmlhttp.responseText);
+		} catch (err){
+			console.log(err);
 			return;
 		}
 		console.log(jsonResp);
@@ -372,10 +343,6 @@ function handleCommentResponse() {
 		if ( commentList != null ) {
 			addComments(commentList, postId);
 		}
-		gResponsePtr = len;
-
-	} else if (xmlhttp.readyState == 4) {
-		gResponsePtr = 0;
 	}
 }
 
@@ -431,29 +398,20 @@ function deletePost(post_id) {
 }
 
 function handleDeleteResponse() {
-	var len = xmlhttp.responseText.length;
-	var xmlResp = xmlhttp.responseText.substring(gResponsePtr, len);
+	
+	if (xmlhttp.readyState == 4) {
 
-	if (xmlhttp.readyState == 3) {
-
-		// Success! Reset retries
-		gRetryCount = 0;
-
-		// This is really kind of ugly. We keep feeding more data in and seeing
-		// if it parses sucessfully. When it does, we know we have a complete
-		// command
-		var jsonResp = JSON.parse(xmlResp);
-		if (jsonResp == null) {
+		var jsonResp;
+		try {
+			jsonResp = JSON.parse(xmlhttp.responseText);
+		} catch (err){
+			console.log(err);
 			return;
 		}
 		console.log(jsonResp);
 		var postId = jsonResp.postId;
 		var el = document.getElementById("post_" + postId);
 		el.parentNode.removeChild( el );
-		gResponsePtr = len;
-
-	} else if (xmlhttp.readyState == 4) {
-		gResponsePtr = 0;
 	}
 }
 
