@@ -463,16 +463,17 @@ function loadImage(){
 	
     var myCanvas = document.getElementById('preview');
 
-	if((navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i))) {
-		// Fix older iphone bug
-		var mpImg = new MegaPixImage(img);
-		mpImg.render(myCanvas, { maxWidth: myCanvas.width, maxHeight: myCanvas.height, orientation: orientation });
-	} else {
+	var mpImg = new MegaPixImage(img);
+	mpImg.render(myCanvas, { maxWidth: myCanvas.width, maxHeight: myCanvas.height, orientation: orientation });
+	var dataURL = myCanvas.toDataURL('image/jpeg');
+
+	var img = new Image;
+	img.onload = function(){
 		// This crops as well as scales.  The iPhone version uploads a larger image and
 		// crops on the server
 		var ctx = myCanvas.getContext('2d');
 		ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
-	    var imageSize = myCanvas.width;
+		var imageSize = myCanvas.width;
 		var h = img.height;
 		var w = img.width;
 		var unscaledSize;
@@ -485,10 +486,10 @@ function loadImage(){
 			y = ( h - w ) / 2;
 			unscaledSize = w;
 		}
-		ctx.setTransform(1, 0, 0, 1, 0, 0);
-		fixRotation(ctx, orientation, imageSize);
 		ctx.drawImage(img, x, y, unscaledSize, unscaledSize, 0, 0, imageSize, imageSize);
-	}
+	};
+	img.src = dataURL;
+
 	myCanvas.style.display = 'block';
 }
 
