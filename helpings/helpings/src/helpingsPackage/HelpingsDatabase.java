@@ -89,7 +89,7 @@ public class HelpingsDatabase
 				String name = rs.getString("username");
 				String token = rs.getString("token");
 
-				String calculatedHash = get_SHA_1_SecurePassword(salt,password);
+				String calculatedHash = get_SHA_1_SecurePassword(password, salt);
 				if ( calculatedHash != null && calculatedHash.equals(hash) ) {
 					// Do we ever update the token?  When should we?
 /*					String token = getSalt();
@@ -135,11 +135,11 @@ public class HelpingsDatabase
 				String email = rs.getString("email");
 				String token = rs.getString("token");
 
-				String calculatedHash = get_SHA_1_SecurePassword(salt,password);
+				String calculatedHash = get_SHA_1_SecurePassword(password, salt);
 				if ( calculatedHash != null && calculatedHash.equals(hash) ) {
 					salt = getSalt();
 					token = getSalt();
-					hash = get_SHA_1_SecurePassword(salt,new_password);
+					hash = get_SHA_1_SecurePassword(password, salt);
 					statement = connection.prepareStatement(UPDATE_USER_PASSWORD);
 					statement.setQueryTimeout(30);  // set timeout to 30 sec.
 					statement.setString(1, token);
@@ -170,7 +170,7 @@ public class HelpingsDatabase
 
 		String salt = getSalt();
 		String token = getSalt();
-		String hash = get_SHA_1_SecurePassword(salt,password);
+		String hash = get_SHA_1_SecurePassword(password, salt);
 		Connection connection = null;
 		try
 		{
@@ -719,7 +719,7 @@ public class HelpingsDatabase
 		}
 	}
 
-	private static String get_SHA_1_SecurePassword(String passwordToHash, String salt)
+	private static String get_SHA_1_SecurePassword_Obsolete(String passwordToHash, String salt)
 	{
 		String generatedPassword = null;
 		try {
@@ -742,14 +742,48 @@ public class HelpingsDatabase
 		return generatedPassword;
 	}
 
+	private static String get_SHA_1_SecurePassword(String passwordToHash, String salt)
+	{
+		if ( salt.startsWith("[B@")) {
+			return get_SHA_1_SecurePassword_Obsolete(salt, passwordToHash);
+		}
+
+		String generatedPassword = null;
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-1");
+			md.update(Base64.getDecoder().decode(salt));
+			byte[] bytes = md.digest(passwordToHash.getBytes());
+			generatedPassword = Base64.getEncoder().encodeToString(bytes);
+		} 
+		catch (NoSuchAlgorithmException e) 
+		{
+			e.printStackTrace();
+		}
+		return generatedPassword;
+	}
+
+	// Returns a random hex string
+	static String randString() throws NoSuchAlgorithmException
+	{
+		SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+		byte[] bytes = new byte[4];
+		sr.nextBytes(bytes);
+		StringBuilder sb = new StringBuilder();
+		// Should use Base64 encode here.
+		for(int i=0; i< bytes.length ;i++)
+		{
+			sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+		}
+		return sb.toString();
+	}
+
 	//Add salt
 	static String getSalt() throws NoSuchAlgorithmException
 	{
 		SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
 		byte[] salt = new byte[16];
 		sr.nextBytes(salt);
-		return salt.toString();
-//		return Base64.getEncoder().encodeToString(salt);
+		return Base64.getEncoder().encodeToString(salt);
 	}
 
 }

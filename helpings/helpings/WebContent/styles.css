@@ -9,6 +9,9 @@ body,input,button,select,option,textarea,form,td,tr,table {
 	font-family: 'Varela Round', Futura, Helvetica, Arial, sans-serif;
 	font-size: 18px;
 	margin: 0 auto;
+	-webkit-appearance: none;
+	-webkit-border-radius:0; 
+    border-radius:0;
 }
 
 button,input {

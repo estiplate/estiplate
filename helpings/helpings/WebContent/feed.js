@@ -434,7 +434,6 @@ function onCardClick(card){
 	}
 }
 
-var img;
 function readURL(input) {
 
 	window.scrollTo(0, 0);
@@ -460,17 +459,26 @@ function loadImage(){
 	EXIF.getData(img, function() {
 		orientation = EXIF.getTag(img, "Orientation");
     });
-	
-    var myCanvas = document.getElementById('preview');
 
+	if((navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i))) {
+		iOsRescaleAndCrop(img, orientation);
+	} else {
+		rescaleAndCrop(img, orientation);
+	}
+
+	myCanvas.style.display = 'block';
+}
+
+function iOsRescaleAndCrop(img, orientation){
+
+	var myCanvas = document.getElementById('preview');
 	var mpImg = new MegaPixImage(img);
 	mpImg.render(myCanvas, { maxWidth: myCanvas.width, maxHeight: myCanvas.height, orientation: orientation });
 	var dataURL = myCanvas.toDataURL('image/jpeg');
 
 	var img = new Image;
 	img.onload = function(){
-		// This crops as well as scales.  The iPhone version uploads a larger image and
-		// crops on the server
+		// Now crop
 		var ctx = myCanvas.getContext('2d');
 		ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
 		var imageSize = myCanvas.width;
@@ -486,11 +494,34 @@ function loadImage(){
 			y = ( h - w ) / 2;
 			unscaledSize = w;
 		}
+		myCanvas.width = imageSize;
+		myCanvas.height = imageSize;
 		ctx.drawImage(img, x, y, unscaledSize, unscaledSize, 0, 0, imageSize, imageSize);
 	};
 	img.src = dataURL;
+}
 
-	myCanvas.style.display = 'block';
+function rescaleAndCrop(img, orientation){
+
+	var myCanvas = document.getElementById('preview');
+	var ctx = myCanvas.getContext('2d');
+	ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
+	var imageSize = myCanvas.width;
+	var h = img.height;
+	var w = img.width;
+	var unscaledSize;
+	var x = 0;
+	var y = 0;
+	if ( w > h ) {
+		x = ( w - h ) / 2;
+		unscaledSize = h;
+	} else if ( h > w ) {
+		y = ( h - w ) / 2;
+		unscaledSize = w;
+	}
+	ctx.setTransform(1, 0, 0, 1, 0, 0);
+	fixRotation(ctx, orientation, imageSize);
+	ctx.drawImage(img, x, y, unscaledSize, unscaledSize, 0, 0, imageSize, imageSize);
 }
 
 function fixRotation( ctx, orientation, imageSize ) {
@@ -513,6 +544,7 @@ function fixRotation( ctx, orientation, imageSize ) {
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
 	}
 }
+
 function cancelUpload() {
 	document.getElementById("cover").style.display = 'none';
 	document.getElementById("uploadContainer").style.display = 'none';
@@ -520,18 +552,22 @@ function cancelUpload() {
 
 function addTag(e) {
 	if (e && e.keyCode == 13) {
-		var taginput = document.getElementById("addtag");
-		var tag = taginput.value.toLowerCase();
-		taginput.value = "";
-		var tags = document.getElementById("tags");
-		var tagSpan = document.createElement('span')
-		tagSpan.innerHTML = tag + " x";
-		tagSpan.className = "tag";
-		tagSpan.setAttribute('onclick', 'removeTag(this)');
-		tags.appendChild(tagSpan);
+		doAddTag();
 		return false;
 	}
 	return true;
+}
+
+function doAddTag(){
+	var taginput = document.getElementById("addtag");
+	var tag = taginput.value.toLowerCase();
+	taginput.value = "";
+	var tags = document.getElementById("tags");
+	var tagSpan = document.createElement('span')
+	tagSpan.innerHTML = tag + " x";
+	tagSpan.className = "tag";
+	tagSpan.setAttribute('onclick', 'removeTag(this)');
+	tags.appendChild(tagSpan);
 }
 
 function removeTag(span) {
@@ -547,6 +583,9 @@ function removeTag(span) {
 
 var submitting = false;
 function addTagsAndSubmit() {
+	
+	// If the user has entered a tag, but not hit return, add it anyway.
+	doAddTag();
 
 	if ( submitting ) {
 		return;

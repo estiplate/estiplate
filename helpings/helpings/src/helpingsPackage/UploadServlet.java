@@ -103,13 +103,13 @@ public class UploadServlet extends HttpServlet {
 		factory.setRepository(repository);
 
 		Date date = new Date();
-		String salt = null;
+		String randString = null;
 		try {
-			salt = HelpingsDatabase.getSalt();
+			randString = HelpingsDatabase.randString();
 		} catch (Exception e) {
 
 		}
-		String filename = Long.toString(date.getTime()) + salt + ".jpg";
+		String filename = Long.toString(date.getTime()) + randString + ".jpg";
 		/*
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				request.getInputStream()));

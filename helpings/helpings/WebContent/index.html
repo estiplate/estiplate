@@ -28,10 +28,10 @@
 	<div id="uploadOverlay"><img src="loader.gif" style="margin: 135px;"></div>
 	<div id="uploadScreen"> 
 	<a href="javascript:cancelUpload()" class="cancel">&times;</a>
-	<canvas id="preview" class="preview" width="800" height="800"></canvas>
+	<canvas id="preview" class="preview" width="600" height="600"></canvas>
 	<br>
-	<form><textarea id="titleinput" style="width: 100%;"></textarea></form>	
-	<div id="tags" style="padding-top: 10px; padding-bottom:10px;"><span class="tagtitle">Tags:</span></div>
+	<form><textarea id="titleinput" style="width: 100%; margin-top: 10px"></textarea></form>	
+	<div id="tags" style="padding-bottom:10px;"><span class="tagtitle">Tags:</span></div>
 	<form><input type="text" onKeyPress="return addTag(event)" id="addtag" placeholder="Add a tag and press enter" style="width: 100%;"></form>
 	<button id="uploadfile" onclick="addTagsAndSubmit()">Post Helping</button></div>
 	<br>
@@ -90,7 +90,6 @@
 	<a id="nextbutton" href="javascript:void(0)" onclick="nextPage();">Next</a>
 	<a id="logout" style="float: right; margin-right: 100px;" href="javascript:void(0)" onclick="logout();">Logout</a>
 	<p>
-	<a href="/upload.html" style="float: left; margin: 10px;">Old Upload</a>	
-	<a href="mailto:feedback@estiplate.com" style="float: right; margin: 10px;">Feedback</a>	
+	<a href="mailto:feedback@estiplate.com" style="float: left; margin: 10px;">Feedback</a>	
 </body>
 <html>
