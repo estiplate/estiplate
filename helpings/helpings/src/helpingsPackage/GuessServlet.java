@@ -16,21 +16,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @WebServlet(urlPatterns="/guess", asyncSupported = true)
-public class GuessServlet extends HttpServlet {
+public class GuessServlet extends EstiplateServlet {
 
 	private static final long serialVersionUID = 1L;
-
-	private HelpingsDatabase mDatabase;
-
-	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
-		mDatabase = new HelpingsDatabase();
-		try {
-			mDatabase.init();
-		} catch (ClassNotFoundException e) {
-
-		}
-	}
 
 	@Override
 	public void doGet(HttpServletRequest request,
@@ -45,42 +33,34 @@ public class GuessServlet extends HttpServlet {
 			HttpServletResponse response)
 					throws ServletException, IOException {
 
+		if ( !verifyUserToken(request, false) ) {
+			return;
+		}
+
 		BufferedReader reader = request.getReader();
 		String line = reader.readLine();
 		JSONObject requestJSON = null;
 		long post = 0;
 		int guess = 0;
 		String username = "";
-		String token = null;
 		try {
 			requestJSON = new JSONObject(line);
 			username = (String) requestJSON.optString("username");
 			post = requestJSON.optLong("post");
-			guess = requestJSON.optInt("calories");
-			token = (String) requestJSON.optString("token");
-			
+			guess = requestJSON.optInt("calories");			
 		} catch ( Exception e ) {}
 
 		if ( requestJSON == null ) {
 			return;
 		}
 
-		boolean success = false;
-		if ( token != null && token.length() > 0 ) {
-			String name = mDatabase.getUserForToken(token);
-			if ( name != null && name.length() > 0 ) {
-				if ( name.equals(username) ) {
-					success = true;
-				}
-			}
+		Exception ex;
+		try {
+			mDatabase.createGuess(post, username, guess);
+		} catch ( Exception e ) {
+			ex = e;
 		}
 
-		// Only save guesses from logged in users (for now)
-		if ( success ) {
-			try {
-				mDatabase.createGuess(post, username, guess);
-			} catch ( Exception e ) {}
-		}
 
 		// Error checking here!!
 		int cals = 0;
@@ -91,7 +71,9 @@ public class GuessServlet extends HttpServlet {
 				cals = ave.average;
 				guesscount = ave.count;
 			}
-		} catch ( Exception e ) {}
+		} catch ( Exception e ) {
+			ex = e;
+		}
 
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();

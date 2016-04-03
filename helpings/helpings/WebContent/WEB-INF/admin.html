@@ -1,0 +1,45 @@
+<html>
+<head>
+<link href='https://fonts.googleapis.com/css?family=Varela+Round'
+	rel='stylesheet' type='text/css'>
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<link rel="stylesheet" type="text/css" href="styles.css">
+<link rel="icon" type="image/png" href="plate.png">
+</head>
+<script type="text/javascript">
+	var submitting = false;
+	function submitMail() {
+
+		var mailcontent = document.getElementById('mailinput').value;
+
+		var fd = new FormData();
+		fd.append("action", "massmail");
+		fd.append("message", mailcontent);
+		if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlhttp = new XMLHttpRequest();
+		} else {// code for IE6, IE5
+			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.onreadystatechange = handlePostResponse;
+		xmlhttp.open("POST", "admin");
+		xmlhttp.send(fd);
+	}
+
+	function handlePostResponse(){
+		if (xmlhttp.readyState == 4) {
+			location.reload();
+		}
+	}
+
+</script>
+<body>
+
+	<div id="user">
+	<h1>ADMIN</h1>
+	<form>
+		<textarea id="mailinput" style="width: 100%; height: 300px; margin-top: 10px"></textarea>
+	</form>
+	<button id="sendmail" onclick="submitMail()">Send Mass Mail</button>
+	</div>
+</html>

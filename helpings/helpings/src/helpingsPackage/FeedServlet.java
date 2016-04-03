@@ -16,26 +16,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @WebServlet(urlPatterns = {"","/feed/*", "/users/*", "/tag/*"}, asyncSupported = true)
-public class FeedServlet extends HttpServlet {
+public class FeedServlet extends EstiplateServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private HelpingsDatabase mDatabase;
 	private static final String FILTER_USERS = "users";
 	private static final String FILTER_TAG = "tag";
 	private static final String FILTER_FEED = "feed";
 	private static final int PLATES_PER_PAGE = 18;
 	private static final int INITIAL_COMMENTS = 10;
-
-	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
-		mDatabase = new HelpingsDatabase();
-		try {
-			mDatabase.init();
-		} catch (ClassNotFoundException e) {
-
-		}
-	}
 
 	@Override
 	public void doGet(HttpServletRequest request,
@@ -72,7 +61,7 @@ public class FeedServlet extends HttpServlet {
 		int limit = PLATES_PER_PAGE;
 		boolean json = false;
 		String username = null;
-		String token = null;
+		// FIXME
 		for (Entry<String, String[]> entry: params.entrySet()){
 			if( entry.getKey().equals("offset")) {
 				offset = Integer.valueOf(entry.getValue()[0]);
@@ -86,22 +75,9 @@ public class FeedServlet extends HttpServlet {
 			if( entry.getKey().equals("username")) {
 				username = entry.getValue()[0];
 			}
-			if( entry.getKey().equals("token")) {
-				token = entry.getValue()[0];
-			}
 		}
 
 		if ( json ) {
-
-			boolean success = false;
-			if ( token != null && token.length() > 0 ) {
-				String name = mDatabase.getUserForToken(token);
-				if ( name != null && name.length() > 0 ) {
-					if ( name.equals(username) ) {
-						success = true;
-					}
-				}
-			}
 
 			ArrayList<Post> posts = null;
 			ArrayList<Average> averages = null;
@@ -116,7 +92,7 @@ public class FeedServlet extends HttpServlet {
 					posts = mDatabase.getPostsInRange(offset, limit);					
 				}
 				averages = mDatabase.getAveragesForPosts(posts);
-				if ( username != null && username.length() > 0 && success) {
+				if ( username != null && username.length() > 0 && verifyUserToken(request, false)) {
 					userGuesses = mDatabase.getUserGuessesForPosts(posts, username);
 				}
 			} catch (Exception e){

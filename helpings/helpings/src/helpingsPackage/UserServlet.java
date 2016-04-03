@@ -1,14 +1,10 @@
 package helpingsPackage;
 
-import java.awt.image.BufferedImage;
 import java.io.*; 
+import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
-import javax.imageio.ImageIO;
 import javax.servlet.*;
 import javax.servlet.annotation.*;
 import javax.servlet.http.*;
@@ -17,22 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @WebServlet(urlPatterns="/user", asyncSupported = true)
-public class UserServlet extends HttpServlet {
+public class UserServlet extends EstiplateServlet {
 
 	private static final long serialVersionUID = 1L;
-
-	private ArrayList<String> mGuestTokens = new ArrayList<String>();
-	private HelpingsDatabase mDatabase;
-
-	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
-			mDatabase = new HelpingsDatabase();
-		try {
-			mDatabase.init();
-		} catch (ClassNotFoundException e) {
-
-		}
-	}
+	private static final int TOKEN_EXPIRY = 60 * 60 * 24 * 30; // Thirty days
 
 	private void handleNewUser(JSONObject requestJSON, HttpServletResponse response) throws IOException{
 
@@ -49,28 +33,20 @@ public class UserServlet extends HttpServlet {
 			response.sendError(401);
 			return;
 		}
-		out.write(token);
-		out.flush();
+		addTokenCookie(response, token);
 	}
 
-	private void handleLogin(JSONObject requestJSON, HttpServletResponse response) throws IOException{
+	private void handleLogin(JSONObject requestJSON, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException{
 		String email = (String) requestJSON.optString("email");
 		String password = (String) requestJSON.optString("password");
 		try {
 			User p = mDatabase.login(email, password);
 			if ( p != null && p.token != null){
-				PrintWriter out = response.getWriter();
-				try {
-					JSONObject responseObject = new JSONObject();
-					responseObject.put("token", p.token);
-					responseObject.put("username", p.name);
-					out.write(responseObject.toString());
-				} catch (JSONException  e){
-				}
-				out.flush();
-				out.flush();
+				addTokenCookie(response, p.token);
+				addUsernameCookie(response, p.name);
 			} else {
 				response.sendError(401);
+				return;
 			}
 		} catch (NoSuchAlgorithmException e){
 
@@ -84,30 +60,13 @@ public class UserServlet extends HttpServlet {
 		try {
 			User p = mDatabase.changePassword(username, password, new_password);
 			if ( p != null && p.token != null){
-				PrintWriter out = response.getWriter();
-				out.write(p.token);
-				out.flush();
-				out.flush();
+				addTokenCookie(response, p.token);
 			} else {
 				response.sendError(401);
 			}
 		} catch (NoSuchAlgorithmException e){
 
 		}
-	}
-
-	private void handleRequestToken(JSONObject requestJSON, HttpServletResponse response) throws IOException{
-
-		String token = (String) requestJSON.optString("token");
-		if ( token == null || mGuestTokens.indexOf(token) < 0 ) {
-			try {
-				token = HelpingsDatabase.getSalt();
-			} catch (NoSuchAlgorithmException e){}
-			mGuestTokens.add(token);
-		}
-		PrintWriter out = response.getWriter();
-		out.write(token);
-		out.flush();
 	}
 
 	@Override
@@ -136,11 +95,7 @@ public class UserServlet extends HttpServlet {
 
 		} else if ( command.equals("login")){
 
-			handleLogin(requestJSON, response);
-
-		} else if ( command.equals("request_token")) {
-
-			handleRequestToken(requestJSON, response);
+			handleLogin(requestJSON, request, response);
 
 		} else if ( command.equals("change_password")) {
 
@@ -149,4 +104,51 @@ public class UserServlet extends HttpServlet {
 		}
 	}
 
+	@Override
+	public void doGet(HttpServletRequest request,
+			HttpServletResponse response)
+					throws ServletException, IOException {
+
+		if ( !verifyUserToken(request, false) ) {
+			return;
+		}
+
+		String action = request.getParameter("action");
+		String username = request.getParameter("username");
+		String setting = request.getParameter("settings");
+		
+		if ( action != null ) {
+			if ( action.equals("set_notify_setting")){
+				try {
+					mDatabase.setNotifySetting(username, Integer.decode(setting));
+					RequestDispatcher view = request.getRequestDispatcher("/success.html");
+					view.forward(request, response);
+					return;
+				} catch (NoSuchAlgorithmException e){}
+			}
+		}
+		RequestDispatcher view = request.getRequestDispatcher("/failure.html");
+		view.forward(request, response);
+	}
+	
+	private void addTokenCookie(HttpServletResponse response, String token) {
+		Cookie cookie;
+		try {
+			cookie = new Cookie("token", URLEncoder.encode(token, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		cookie.setMaxAge(TOKEN_EXPIRY);
+		cookie.setPath("/");
+		response.addCookie(cookie);
+	}
+
+	private void addUsernameCookie(HttpServletResponse response, String username) {
+		Cookie cookie = new Cookie("username", username);
+		cookie.setMaxAge(Integer.MAX_VALUE);
+		cookie.setPath("/");
+		response.addCookie(cookie);
+	}
 }

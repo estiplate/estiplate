@@ -50,25 +50,12 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
 @WebServlet(urlPatterns = "/upload")
-public class UploadServlet extends HttpServlet {
+public class UploadServlet extends EstiplateServlet {
 
 	private static final long serialVersionUID = 1L;
 
 	private static final int THUMB_WIDTH = 600;
 	static final String UPLOAD_PATH = "/var/www/uploads/";
-	private HelpingsDatabase mDatabase;
-
-	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
-		mDatabase = new HelpingsDatabase();
-		try {
-			mDatabase.init();
-		} catch (ClassNotFoundException e) {
-
-		}
-	//	uploadAllToAmazon();
-		
-	}
 
 	public void uploadAllToAmazon(){
 		File uploadDir = new File(UPLOAD_PATH);
@@ -93,6 +80,11 @@ public class UploadServlet extends HttpServlet {
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, java.io.IOException {
+
+		if ( !verifyUserToken(request, false) ) {
+			return;
+		}
+
 		// Create a factory for disk-based file items
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 
@@ -148,23 +140,6 @@ public class UploadServlet extends HttpServlet {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-
-		boolean success = false;
-		String name = "";
-		if (token != null && token.length() > 0) {
-			name = mDatabase.getUserForToken(token);
-			if (name != null && name.length() > 0) {
-				if (name.equals(username)) {
-					success = true;
-				}
-			}
-		}
-		if (!success) {
-			PrintWriter out = response.getWriter();
-			out.println("WRONG! " + name + " " + token);
-			out.flush();
-			return;
 		}
 
 		File imagefile = new File(UPLOAD_PATH + filename);

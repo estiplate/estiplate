@@ -47,7 +47,6 @@ function changePassword() {
 				loginFailed("Please re-enter your password and try again");
 				document.forms["userForm"]["old_password"].value = "";
 			} else {
-				setCookie("token",userRequest.responseText);
 				document.getElementById("user").style.display = 'none';
 				location.href='feed';
 			}

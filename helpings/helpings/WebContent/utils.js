@@ -55,7 +55,7 @@ function saveCookies(days){
 	days = days || 365;
 
 	// Get unix milliseconds at current time plus number of days
-	date.setTime(+ date + (days * 86400000)); //24 * 60 * 60 * 1000
+	date.setTime( date + (days * 86400000)); //24 * 60 * 60 * 1000
 
 	var cookieString="";
 	for( var i=0; i<gCookies.length; i++){

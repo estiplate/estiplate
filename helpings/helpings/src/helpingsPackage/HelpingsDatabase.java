@@ -16,6 +16,9 @@ public class HelpingsDatabase
 {
 	static final String CREATE_USER_TABLE = "create table if not exists users (username string, email string, salt string, hash string, token string)";
 	static final String CREATE_USER = "insert into users (username,email,salt,hash,token) values (?,?,?,?,?)";
+	static final String ADD_ADMIN_COLUMN = "alter table users add admin int";
+	static final String ADD_NOTIFY_SETTING_COLUMN = "alter table users add notifysetting int";
+	static final String UPDATE_NOTIFY_SETTING = "update users set notifysetting=? where username=?";
 	static final String GET_USER = "select * from users where username=?";
 	static final String GET_USERS = "select * from users";
 	static final String GET_USER_BY_EMAIL = "select * from users where email=?";
@@ -60,6 +63,8 @@ public class HelpingsDatabase
 			statement.executeUpdate(CREATE_GUESS_TABLE);
 			statement.executeUpdate(CREATE_COMMENT_TABLE);
 			statement.executeUpdate(CREATE_TAG_TABLE);
+			statement.executeUpdate(ADD_ADMIN_COLUMN);
+			statement.executeUpdate(ADD_NOTIFY_SETTING_COLUMN);
 		}
 		catch(SQLException e)
 		{
@@ -115,6 +120,29 @@ public class HelpingsDatabase
 			closeConnection(connection);
 		}
 		return null;
+	}
+
+	public void setNotifySetting(String username, int setting) throws NoSuchAlgorithmException{
+
+		Connection connection = null;
+		try
+		{
+			// create a database connection
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+			PreparedStatement statement = connection.prepareStatement(UPDATE_NOTIFY_SETTING);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			statement.setInt(1, setting);
+			statement.setString(2, username);
+			statement.executeUpdate();	
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
 	}
 
 	public User changePassword(String username, String password, String new_password) throws NoSuchAlgorithmException{
@@ -569,6 +597,34 @@ public class HelpingsDatabase
 		return guesses;
 	}
 
+	public String getAdminForToken(String token){
+
+		Connection connection = null;
+		try
+		{
+			// create a database connection
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+			PreparedStatement statement = connection.prepareStatement(GET_USER_BY_TOKEN);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			statement.setString(1, token);
+			ResultSet rs = statement.executeQuery();
+			if(rs.next())
+			{
+				if ( rs.getInt("admin") > 0 ) {
+					return rs.getString("username");
+				}
+			}
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		return null;
+	}
 
 	public String getUserForToken(String token){
 

@@ -41,9 +41,6 @@ function login() {
 			if ( userRequest.status == 401 ) {
 				loginFailed("Login Failed!");
 			} else {
-				var jsonResp = JSON.parse(userRequest.responseText);
-				setCookie("token", jsonResp.token);
-				setCookie("username", jsonResp.username);
 				document.getElementById("user").style.display = 'none';
 				location.href='/feed';
 			}
@@ -101,8 +98,6 @@ function createUser() {
 			if ( userRequest.status == 401 ) {
 				loginFailed("User Create Failed!");
 			} else {
-				setCookie("token",userRequest.responseText);
-				setCookie("username",gName);
 				document.getElementById("user").style.display = 'none';
 				location.href='feed';
 			}

@@ -21,18 +21,6 @@ public class ImageServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private HelpingsDatabase mDatabase;
-
-	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
-		mDatabase = new HelpingsDatabase();
-		try {
-			mDatabase.init();
-		} catch (ClassNotFoundException e) {
-
-		}
-	}
-
 	@Override
 	public void doGet(HttpServletRequest request,
 			HttpServletResponse response)
