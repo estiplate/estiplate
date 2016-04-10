@@ -1,6 +1,7 @@
 package helpingsPackage;
 
 import java.io.*; 
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -16,7 +17,6 @@ import org.json.JSONObject;
 public class UserServlet extends EstiplateServlet {
 
 	private static final long serialVersionUID = 1L;
-	private static final int TOKEN_EXPIRY = 60 * 60 * 24 * 30; // Thirty days
 
 	private void handleNewUser(JSONObject requestJSON, HttpServletResponse response) throws IOException{
 
@@ -33,6 +33,7 @@ public class UserServlet extends EstiplateServlet {
 			response.sendError(401);
 			return;
 		}
+		addUsernameCookie(response, username);
 		addTokenCookie(response, token);
 	}
 
@@ -109,46 +110,27 @@ public class UserServlet extends EstiplateServlet {
 			HttpServletResponse response)
 					throws ServletException, IOException {
 
-		if ( !verifyUserToken(request, false) ) {
-			return;
-		}
-
-		String action = request.getParameter("action");
+		String token = request.getParameter("token");
 		String username = request.getParameter("username");
-		String setting = request.getParameter("settings");
-		
-		if ( action != null ) {
-			if ( action.equals("set_notify_setting")){
-				try {
-					mDatabase.setNotifySetting(username, Integer.decode(setting));
-					RequestDispatcher view = request.getRequestDispatcher("/success.html");
-					view.forward(request, response);
-					return;
-				} catch (NoSuchAlgorithmException e){}
+
+		if ( verifyUrlToken(token, username) ) {
+			String action = request.getParameter("action");
+			if ( action != null ) {
+				if ( action.equals("set_notify_setting")){
+					String setting = request.getParameter("notifysetting");
+					if ( username != null || setting != null ) {
+						try {
+							mDatabase.setNotifySetting(username, Integer.decode(setting));
+							RequestDispatcher view = request.getRequestDispatcher("/success.html");
+							view.forward(request, response);
+							return;
+						} catch (NoSuchAlgorithmException e){}
+					}
+				}
 			}
 		}
+
 		RequestDispatcher view = request.getRequestDispatcher("/failure.html");
 		view.forward(request, response);
-	}
-	
-	private void addTokenCookie(HttpServletResponse response, String token) {
-		Cookie cookie;
-		try {
-			cookie = new Cookie("token", URLEncoder.encode(token, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		cookie.setMaxAge(TOKEN_EXPIRY);
-		cookie.setPath("/");
-		response.addCookie(cookie);
-	}
-
-	private void addUsernameCookie(HttpServletResponse response, String username) {
-		Cookie cookie = new Cookie("username", username);
-		cookie.setMaxAge(Integer.MAX_VALUE);
-		cookie.setPath("/");
-		response.addCookie(cookie);
 	}
 }

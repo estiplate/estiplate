@@ -4,11 +4,20 @@ var gToken = "";
 
 window.onload = function() {
 
+	checkLoginStatus();
+	sendFeedRequest();
+}
+
+function checkLoginStatus(){
+
 	gToken = getCookie("token");
 	if ( gToken == undefined || gToken.length == 0) {
 		document.getElementById("postbutton").innerHTML = "Sign Up";
 		document.getElementById("postbutton").href = "/login.html";
 		document.getElementById("logout").style.display = "none";
+		document.getElementById('postbutton').onclick = function() {
+			document.getElementById('postbutton').click();
+		};
 	} else {
 		gUsername = getCookie("username");
 		document.getElementById("username").innerHTML = gUsername;
@@ -16,8 +25,6 @@ window.onload = function() {
 			document.getElementById('uploadinput').click();
 		};
 	}
-
-	sendFeedRequest();
 }
 
 function logout() {
@@ -214,6 +221,9 @@ function handleFeedResponse() {
 
 	if (xmlhttp.readyState == 4) {
 
+		// Check the server logged us out
+		checkLoginStatus();
+
 		var jsonResp;
 		try {
 			jsonResp = JSON.parse(xmlhttp.responseText);
@@ -240,7 +250,6 @@ function sendGuess(input) {
 	console.log(input);
 	var calories = input["calories"].value;
 	var post_id = input.getAttribute("data_postid");
-	document.getElementById('card_' + post_id).classList.toggle('flipped');
 
 	document.getElementById("guess_" + post_id).innerHTML = "Your Guess: "
 			+ calories;
@@ -278,10 +287,12 @@ function handleGuessResponse() {
 		try {
 			jsonResp = JSON.parse(xmlhttp.responseText);
 		} catch (err){
+			location.reload();
 			console.log(err);
 			return;
 		}
 		var post = jsonResp.rowid;
+		document.getElementById('card_' + post).classList.toggle('flipped');
 		populateGuess( jsonResp.average, jsonResp.userguess, jsonResp.guesscount, post);
 		showGuess(post, true);
 		showGuessInput(post, false);
@@ -561,6 +572,9 @@ function addTag(e) {
 function doAddTag(){
 	var taginput = document.getElementById("addtag");
 	var tag = taginput.value.toLowerCase();
+	if( tag.length == 0 ) {
+		return;
+	}
 	taginput.value = "";
 	var tags = document.getElementById("tags");
 	var tagSpan = document.createElement('span')

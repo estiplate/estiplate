@@ -12,10 +12,14 @@
 	function submitMail() {
 
 		var mailcontent = document.getElementById('mailinput').value;
+		var subject = document.getElementById('subject').value;
 
-		var fd = new FormData();
-		fd.append("action", "massmail");
-		fd.append("message", mailcontent);
+		var params = new Object();
+		params.action = "massmail";
+		params.subject = subject;
+		params.message = mailcontent;
+		var paramString = JSON.stringify(params);
+
 		if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
 			xmlhttp = new XMLHttpRequest();
 		} else {// code for IE6, IE5
@@ -23,7 +27,8 @@
 		}
 		xmlhttp.onreadystatechange = handlePostResponse;
 		xmlhttp.open("POST", "admin");
-		xmlhttp.send(fd);
+		xmlhttp.send(paramString);
+	
 	}
 
 	function handlePostResponse(){
@@ -38,6 +43,7 @@
 	<div id="user">
 	<h1>ADMIN</h1>
 	<form>
+		<textarea id="subject" style="width: 100%; height: 50px; margin-top: 10px"></textarea>
 		<textarea id="mailinput" style="width: 100%; height: 300px; margin-top: 10px"></textarea>
 	</form>
 	<button id="sendmail" onclick="submitMail()">Send Mass Mail</button>

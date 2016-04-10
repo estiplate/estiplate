@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <link href='https://fonts.googleapis.com/css?family=Varela+Round'
@@ -8,9 +9,17 @@ body, input, button, select, option, textarea, form, td, tr, table {
 	font-size: 100%;
 	-webkit-appearance: none;
 }
+
 </style>
 </head>
-<body>
-	<h1> ESTIPLATE</h1>
-	{content}
+<body bgcolor="#e9e9e9">
+	<table width="100%" border="0" cellpadding="20" cellspacing="0">
+		<tr>
+			<td width="650" valign="top" align="center" bgcolor="#e9e9e9">
+			<img width="50" height="50" id="plate" src="http://estiplate.com/plate.png">
+				<h2>Hi {username}!</h2>
+				{content}
+			</td>
+		</tr>
+	</table>
 </html>

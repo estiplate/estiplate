@@ -1,6 +1,7 @@
 package helpingsPackage;
 
 import java.io.*; 
+import java.net.URLDecoder;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -61,6 +62,7 @@ public class FeedServlet extends EstiplateServlet {
 		int limit = PLATES_PER_PAGE;
 		boolean json = false;
 		String username = null;
+		String token = null;
 		// FIXME
 		for (Entry<String, String[]> entry: params.entrySet()){
 			if( entry.getKey().equals("offset")) {
@@ -75,10 +77,31 @@ public class FeedServlet extends EstiplateServlet {
 			if( entry.getKey().equals("username")) {
 				username = entry.getValue()[0];
 			}
+			if( entry.getKey().equals("token")) {
+				token = entry.getValue()[0];
+			}
 		}
 
 		if ( json ) {
-
+			
+			boolean loggedIn = false;
+			if ( token != null && token.length() > 0 ) {
+				token = URLDecoder.decode(token, "UTF-8");
+				String name =  mDatabase.getUserForToken(token);
+				if ( name != null && name.length() > 0 ) {
+					if ( name.equals(username) ) {
+						loggedIn = true;
+						// This resets the cookie so that it is properly encoded
+						addTokenCookie(response, token);
+					}
+				}
+				if ( !loggedIn ) {
+					// if the token doesn't match, delete it, and don't use the username
+					username = "";
+					deleteTokenCookie(response);
+				}
+			}
+	
 			ArrayList<Post> posts = null;
 			ArrayList<Average> averages = null;
 			ArrayList<Integer> userGuesses = null;
@@ -92,8 +115,11 @@ public class FeedServlet extends EstiplateServlet {
 					posts = mDatabase.getPostsInRange(offset, limit);					
 				}
 				averages = mDatabase.getAveragesForPosts(posts);
-				if ( username != null && username.length() > 0 && verifyUserToken(request, false)) {
-					userGuesses = mDatabase.getUserGuessesForPosts(posts, username);
+				
+				if ( username != null && username.length() > 0 ) {
+					if( loggedIn ) {
+						userGuesses = mDatabase.getUserGuessesForPosts( posts, username );
+					}
 				}
 			} catch (Exception e){
 			}

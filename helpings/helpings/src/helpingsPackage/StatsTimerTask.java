@@ -51,12 +51,12 @@ public class StatsTimerTask extends TimerTask {
 		try {
 			ArrayList<Post> posts = mDatabase.getPostsSince(date.getTime() -  MONTH );
 			ArrayList<Average> averages = mDatabase.getAveragesForPosts(posts);
-			ArrayList<String> usernames = mDatabase.getUsers();
+			ArrayList<User> users = mDatabase.getUsers();
 			int mostGuesses = 0;
 			float bestAccuracy = -1;
-			for ( String username: usernames ) {
-					System.out.println( "Gathering stats for " + username);
-					ArrayList<Integer> userGuesses = mDatabase.getUserGuessesForPosts(posts, username);
+			for ( User user: users ) {
+					System.out.println( "Gathering stats for " + user.name);
+					ArrayList<Integer> userGuesses = mDatabase.getUserGuessesForPosts(posts, user.name);
 					ArrayList<Float> percentErrors = new ArrayList<Float>();
 					ArrayList<Float> calorieErrors = new ArrayList<Float>();
 					int i = 0;
@@ -83,17 +83,17 @@ public class StatsTimerTask extends TimerTask {
 					float totalPercentError = (summedPercentError / (float) percentErrors.size() );
 					if(percentErrors.size() > mostGuesses) {
 						mostGuesses = percentErrors.size();
-						mMostGuessesUser = username;
+						mMostGuessesUser = user.name;
 					}
 					if(bestAccuracy < 0 || totalPercentError < bestAccuracy) {
 						bestAccuracy = totalPercentError;
-						mMostAccurateUser = username;
+						mMostAccurateUser = user.name;
 					}
-					StatsUser user = new StatsUser();
-					user.accuracy = totalPercentError;
-					user.username = username;
-					user.guessCount = percentErrors.size();
-					mUsers.add(user);
+					StatsUser statsuser = new StatsUser();
+					statsuser.accuracy = totalPercentError;
+					statsuser.username = user.name;
+					statsuser.guessCount = percentErrors.size();
+					mUsers.add(statsuser);
 
 			}
 		} catch (Exception e) {

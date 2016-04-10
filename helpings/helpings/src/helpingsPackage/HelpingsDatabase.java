@@ -370,9 +370,9 @@ public class HelpingsDatabase
 		return posts;
 	}
 
-	public ArrayList<String> getUsers() throws NoSuchAlgorithmException{
+	public ArrayList<User> getUsers() throws NoSuchAlgorithmException{
 
-		ArrayList<String> users = new ArrayList<String>();
+		ArrayList<User> users = new ArrayList<User>();
 
 		Connection connection = null;
 		try
@@ -383,7 +383,12 @@ public class HelpingsDatabase
 			statement.setQueryTimeout(30);  // set timeout to 30 sec.
 			ResultSet rs = statement.executeQuery();
 			while( rs.next() ) {
-				users.add( rs.getString("username") );
+				User user = new User();
+				user.name = rs.getString("username");
+				user.email = rs.getString("email");
+				user.token = rs.getString("token");
+				user.notifySetting = rs.getInt("notifysetting");
+				users.add( user );
 			}	
 		}
 		catch(SQLException e)

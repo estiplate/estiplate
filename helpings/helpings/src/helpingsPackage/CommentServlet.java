@@ -25,7 +25,7 @@ public class CommentServlet extends EstiplateServlet {
 			HttpServletResponse response)
 					throws ServletException, IOException {
 
-		if ( !verifyUserToken(request, false) ) {
+		if ( !verifyUserToken(request,response, false) ) {
 			return;
 		}
 

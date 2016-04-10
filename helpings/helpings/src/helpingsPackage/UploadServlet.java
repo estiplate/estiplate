@@ -81,7 +81,7 @@ public class UploadServlet extends EstiplateServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, java.io.IOException {
 
-		if ( !verifyUserToken(request, false) ) {
+		if ( !verifyUserToken(request, response, false) ) {
 			return;
 		}
 
