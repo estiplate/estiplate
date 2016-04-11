@@ -292,7 +292,12 @@ function handleGuessResponse() {
 			return;
 		}
 		var post = jsonResp.rowid;
-		document.getElementById('card_' + post).classList.toggle('flipped');
+		var card = document.getElementById('card_' + post);
+		var top = card.getBoundingClientRect().top;
+		if ( top < 60 ) {
+			window.scrollBy(0, top - 60);
+		}
+		card.classList.toggle('flipped');
 		populateGuess( jsonResp.average, jsonResp.userguess, jsonResp.guesscount, post);
 		showGuess(post, true);
 		showGuessInput(post, false);
@@ -607,6 +612,12 @@ function addTagsAndSubmit() {
 	submitting = true;
 	document.getElementById("uploadOverlay").style.display = 'block';
 
+	var uploadContainer = document.getElementById("uploadContainer")
+	var top = uploadContainer.getBoundingClientRect().top;
+	if ( top < 0 ) {
+		window.scrollBy(0, top);
+	}
+	
 	var tags = document.getElementById("tags");
 	var taglist = tags.children;
 	var tagarray = [];
