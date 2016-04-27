@@ -81,7 +81,8 @@ public class UploadServlet extends EstiplateServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, java.io.IOException {
 
-		if ( !verifyUserToken(request, response, false) ) {
+		String username = verifyUserToken(request,response, false, true);
+		if ( username == null ) {
 			return;
 		}
 
@@ -112,7 +113,7 @@ public class UploadServlet extends EstiplateServlet {
 		// Create a new file upload handler
 		ServletFileUpload upload = new ServletFileUpload(factory);
 
-		String title = null, username = null, token = null, tags = null;
+		String title = null, tags = null;
 		// Parse the request
 		try {
 			List<FileItem> items = upload.parseRequest(request);
@@ -121,10 +122,6 @@ public class UploadServlet extends EstiplateServlet {
 					String key = item.getFieldName();
 					if (key.equals("title")) {
 						title = item.getString();
-					} else if (key.equals("username")) {
-						username = item.getString();
-					} else if (key.equals("token")) {
-						token = item.getString();
 					} else if (key.equals("tags")) {
 						tags = item.getString();
 					}

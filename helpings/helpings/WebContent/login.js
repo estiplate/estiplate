@@ -99,7 +99,7 @@ function createUser() {
 				loginFailed("User Create Failed!");
 			} else {
 				document.getElementById("user").style.display = 'none';
-				location.href='feed';
+				location.href='/';
 			}
 		}
 	};

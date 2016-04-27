@@ -15,5 +15,5 @@ public class User {
 	public String email;
 	public boolean admin;
 	public int notifySetting;
-
+	public boolean guest;
 }

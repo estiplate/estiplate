@@ -25,7 +25,8 @@ public class DeleteServlet extends EstiplateServlet {
 			HttpServletResponse response)
 					throws ServletException, IOException {
 
-		if ( !verifyUserToken(request, response, false) ) {
+		String username = verifyUserToken(request,response, false, true);
+		if ( username == null ) {
 			return;
 		}
 
@@ -33,10 +34,8 @@ public class DeleteServlet extends EstiplateServlet {
 		String line = reader.readLine();
 		JSONObject requestJSON = null;
 		long post = 0;
-		String username = "";
 		try {
 			requestJSON = new JSONObject(line);
-			username = (String) requestJSON.optString("username");
 			post = requestJSON.optLong("post");
 
 		} catch ( Exception e ) {}

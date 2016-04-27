@@ -1,6 +1,12 @@
 <html>
 <head>
-<title>ESTIPLATE</title>
+<title>Estiplate</title>
+<meta name="viewport" content="width=device-width">
+<meta property="og:title" content="Estiplate" />
+<meta property="og:type" content="article" />
+<meta property="og:image" content="https://s3-us-west-2.amazonaws.com/estiplate/thumbs/thumb1459182006724[B@136d6aab.jpg" />
+<meta property="og:url" content="http://estiplate.com" />
+<meta property="og:description" content="Estiplate is a community for crowdsourced calorie counting." />
 <link href='https://fonts.googleapis.com/css?family=Varela+Round'
 	rel='stylesheet' type='text/css'>
 <link rel="stylesheet" type="text/css" href="/feed.css">
@@ -8,7 +14,6 @@
 <script type="text/javascript" charset="utf-8" src="/feed.js"></script>
 <script type="text/javascript" charset="utf-8" src="/utils.js"></script>
 <script type="text/javascript" charset="utf-8" src="/megapix-image.js"></script>
-<meta name="viewport" content="width=device-width">
 <link rel="icon" type="image/png" href="plate.png">
 </head>
 <body>
@@ -17,7 +22,8 @@
 		<a href="http://estiplate.com" class="pagetitle" style="margin-left: 10px; color: #000000;">ESTIPLATE</a>
 		<span style="float: right; margin-right: 20px; margin-top: 10px;">
 		<span id="username" style="margin-right: 10px; display: none;"></span>
-		<a href="/stats.jsp" style="margin-right: 10px;">&#x2606;</a>
+		<a href="/stats.jsp" style="margin-right: 5px;">&#x2606;</a>
+		<a id="signup" style="margin-right: 5px;" href="/login.html">Sign Up</a>
 		<a href="javascript:void(0)" id="postbutton" >Upload</a>
 		</span>
 	</div>
@@ -33,12 +39,12 @@
 	<form><textarea id="titleinput" style="width: 100%; margin-top: 10px"></textarea></form>	
 	<div id="tags" style="padding-bottom:10px;"><span class="tagtitle">Tags:</span></div>
 	<form><input type="text" onKeyPress="return addTag(event)" id="addtag" placeholder="Add a tag and press enter" style="width: 100%;"></form>
-	<button id="uploadfile" onclick="addTagsAndSubmit()">Post Helping</button></div>
+	<button id="uploadfile" onclick="addTagsAndSubmit()">Post Plate</button></div>
 	<br>
 	</div>
 	</div>
-	
-	<form action="upload" method="post" enctype="multipart/form-data" id="uploadform" style="display: none;">
+
+	<form action="upload" method="post" enctype="multipart/form-data" id="uploadform">
 	<input type="file" name="file" size="50" id="uploadinput" accept="image/*"
 			onchange="readURL(this);" /> </form>
 	<div class="post" id="templatepost" style="display: none;">

@@ -25,7 +25,8 @@ public class CommentServlet extends EstiplateServlet {
 			HttpServletResponse response)
 					throws ServletException, IOException {
 
-		if ( !verifyUserToken(request,response, false) ) {
+		String username = verifyUserToken(request,response, false, true);
+		if ( username == null ) {
 			return;
 		}
 
@@ -34,13 +35,11 @@ public class CommentServlet extends EstiplateServlet {
 		JSONObject requestJSON = null;
 		long post = 0;
 		String comment = "";
-		String username = "";
 		long date = System.currentTimeMillis();
 		try {
 			requestJSON = new JSONObject(line);
 			post = requestJSON.optLong("post");
 			comment = requestJSON.optString("comment");
-			username = requestJSON.optString("username");
 		} catch ( Exception e ) {}
 
 		if ( requestJSON == null ) {

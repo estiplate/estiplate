@@ -31,9 +31,15 @@ public class FeedServlet extends EstiplateServlet {
 	public void doGet(HttpServletRequest request,
 			HttpServletResponse response)
 					throws ServletException, IOException {
+
 		PrintWriter out = response.getWriter();
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 		response.setHeader("Pragma", "no-cache");
+
+		String username = null;
+		if ( request.getCookies() != null ) {
+			username = verifyUserToken(request, response, false, true, false);
+		}
 
 		String uri = request.getRequestURI();
 		String[] pathSegments = uri.split("/");
@@ -57,50 +63,23 @@ public class FeedServlet extends EstiplateServlet {
 				}
 			}
 		}
-		Map<String, String[]>params = request.getParameterMap();
 		int offset = (page - 1) * PLATES_PER_PAGE;
 		int limit = PLATES_PER_PAGE;
 		boolean json = false;
-		String username = null;
-		String token = null;
-		// FIXME
-		for (Entry<String, String[]> entry: params.entrySet()){
-			if( entry.getKey().equals("offset")) {
-				offset = Integer.valueOf(entry.getValue()[0]);
-			}
-			if( entry.getKey().equals("limit")) {
-				limit = Integer.valueOf(entry.getValue()[0]);
-			}
-			if( entry.getKey().equals("json")) {
-				json = Boolean.valueOf(entry.getValue()[0]);
-			}
-			if( entry.getKey().equals("username")) {
-				username = entry.getValue()[0];
-			}
-			if( entry.getKey().equals("token")) {
-				token = entry.getValue()[0];
-			}
+		String offsetString = request.getParameter("offset");
+		if ( offsetString != null ) {
+			offset = Integer.valueOf(offsetString);
+		}
+		String limitString = request.getParameter("limit");
+		if ( limitString != null ) {
+			limit = Integer.valueOf(limitString);
+		}
+		String jsonString = request.getParameter("json");
+		if ( jsonString != null ) {
+			json = Boolean.valueOf(jsonString);
 		}
 
 		if ( json ) {
-			
-			boolean loggedIn = false;
-			if ( token != null && token.length() > 0 ) {
-				token = URLDecoder.decode(token, "UTF-8");
-				String name =  mDatabase.getUserForToken(token);
-				if ( name != null && name.length() > 0 ) {
-					if ( name.equals(username) ) {
-						loggedIn = true;
-						// This resets the cookie so that it is properly encoded
-						addTokenCookie(response, token);
-					}
-				}
-				if ( !loggedIn ) {
-					// if the token doesn't match, delete it, and don't use the username
-					username = "";
-					deleteTokenCookie(response);
-				}
-			}
 	
 			ArrayList<Post> posts = null;
 			ArrayList<Average> averages = null;
@@ -117,7 +96,7 @@ public class FeedServlet extends EstiplateServlet {
 				averages = mDatabase.getAveragesForPosts(posts);
 				
 				if ( username != null && username.length() > 0 ) {
-					if( loggedIn ) {
+					if( username != null ) {
 						userGuesses = mDatabase.getUserGuessesForPosts( posts, username );
 					}
 				}

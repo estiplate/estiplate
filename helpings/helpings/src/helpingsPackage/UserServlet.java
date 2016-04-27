@@ -30,11 +30,12 @@ public class UserServlet extends EstiplateServlet {
 		} catch (NoSuchAlgorithmException e){
 		}
 		if ( token == null ) {
-			response.sendError(401);
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			return;
 		}
 		addUsernameCookie(response, username);
 		addTokenCookie(response, token);
+		addGuestCookie(response, false);
 	}
 
 	private void handleLogin(JSONObject requestJSON, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException{
@@ -45,8 +46,9 @@ public class UserServlet extends EstiplateServlet {
 			if ( p != null && p.token != null){
 				addTokenCookie(response, p.token);
 				addUsernameCookie(response, p.name);
+				addGuestCookie(response, false);
 			} else {
-				response.sendError(401);
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
 		} catch (NoSuchAlgorithmException e){
@@ -63,7 +65,7 @@ public class UserServlet extends EstiplateServlet {
 			if ( p != null && p.token != null){
 				addTokenCookie(response, p.token);
 			} else {
-				response.sendError(401);
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			}
 		} catch (NoSuchAlgorithmException e){
 

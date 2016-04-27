@@ -10,14 +10,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Base64;
+
+import org.apache.commons.codec.binary.Base64;
 
 public class HelpingsDatabase
 {
 	static final String CREATE_USER_TABLE = "create table if not exists users (username string, email string, salt string, hash string, token string)";
 	static final String CREATE_USER = "insert into users (username,email,salt,hash,token) values (?,?,?,?,?)";
+	static final String CREATE_GUEST_USER = "insert into users (username,token,guest) values (?,?,1)";
 	static final String ADD_ADMIN_COLUMN = "alter table users add admin int";
 	static final String ADD_NOTIFY_SETTING_COLUMN = "alter table users add notifysetting int";
+	static final String ADD_GUEST_COLUMN = "alter table users add guest int";
 	static final String UPDATE_NOTIFY_SETTING = "update users set notifysetting=? where username=?";
 	static final String GET_USER = "select * from users where username=?";
 	static final String GET_USERS = "select * from users";
@@ -43,6 +46,7 @@ public class HelpingsDatabase
 	static final String CREATE_TAG_TABLE = "create table if not exists tags (post int, tag string)";
 	static final String CREATE_TAG = "insert into tags (post, tag) values (?,?)";
 	static final String GET_POSTS_FOR_TAG_IN_RANGE = "select rowid, username, title, beforeimage, afterimage, date, tags from posts where rowid in (select post from tags where tag=?)  order by rowid desc limit ? offset ? ";
+	static final String GET_GUEST_COUNT = "select count(*) from users where guest=1";
 	static final String DATABASE_CONNECTION_STRING = "jdbc:sqlite:/var/www/helpings.db";
 
 	public void init() throws ClassNotFoundException
@@ -63,6 +67,7 @@ public class HelpingsDatabase
 			statement.executeUpdate(CREATE_GUESS_TABLE);
 			statement.executeUpdate(CREATE_COMMENT_TABLE);
 			statement.executeUpdate(CREATE_TAG_TABLE);
+			statement.executeUpdate(ADD_GUEST_COLUMN);
 			statement.executeUpdate(ADD_ADMIN_COLUMN);
 			statement.executeUpdate(ADD_NOTIFY_SETTING_COLUMN);
 		}
@@ -242,6 +247,46 @@ public class HelpingsDatabase
 		return token;
 	}
 
+	public synchronized User createNewGuestUser() throws NoSuchAlgorithmException{
+
+		String token = getSalt();
+		Connection connection = null;
+		String username = null;
+		try
+		{
+			// create a database connection
+			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
+
+			PreparedStatement statement = connection.prepareStatement(GET_GUEST_COUNT);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			ResultSet rs = statement.executeQuery();
+			int count = 0;
+			if( rs.next() ){
+				count = rs.getInt("count(*)");
+			}
+			username = "guest_user_" + count;
+
+			statement = connection.prepareStatement(CREATE_GUEST_USER);
+			statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			statement.setString(1, username);
+			statement.setString(2, token);
+			statement.executeUpdate();
+		}
+		catch(SQLException e)
+		{
+			System.err.println(e.getMessage());
+			return null;
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		User user = new User();
+		user.name = username;
+		user.token = token;
+		return user;
+	}
+	
 	synchronized public int createPost(String username, String title, String beforeimage, String afterimage, long date, String tags) throws NoSuchAlgorithmException{
 
 		int result = 0;
@@ -602,7 +647,7 @@ public class HelpingsDatabase
 		return guesses;
 	}
 
-	public String getAdminForToken(String token){
+	public User getUserForToken(String token){
 
 		Connection connection = null;
 		try
@@ -615,36 +660,11 @@ public class HelpingsDatabase
 			ResultSet rs = statement.executeQuery();
 			if(rs.next())
 			{
-				if ( rs.getInt("admin") > 0 ) {
-					return rs.getString("username");
-				}
-			}
-		}
-		catch(SQLException e)
-		{
-			System.err.println(e.getMessage());
-		}
-		finally
-		{
-			closeConnection(connection);
-		}
-		return null;
-	}
-
-	public String getUserForToken(String token){
-
-		Connection connection = null;
-		try
-		{
-			// create a database connection
-			connection = DriverManager.getConnection(DATABASE_CONNECTION_STRING);
-			PreparedStatement statement = connection.prepareStatement(GET_USER_BY_TOKEN);
-			statement.setQueryTimeout(30);  // set timeout to 30 sec.
-			statement.setString(1, token);
-			ResultSet rs = statement.executeQuery();
-			if(rs.next())
-			{
-				return rs.getString("username");
+				User user = new User();
+				user.name = rs.getString("username");
+				user.guest = rs.getInt("guest") > 0;
+				user.admin = rs.getInt("admin") > 0;
+				return user;
 			}
 		}
 		catch(SQLException e)
@@ -812,9 +832,9 @@ public class HelpingsDatabase
 		String generatedPassword = null;
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-1");
-			md.update(Base64.getDecoder().decode(salt));
+			md.update(Base64.decodeBase64(salt));
 			byte[] bytes = md.digest(passwordToHash.getBytes());
-			generatedPassword = Base64.getEncoder().encodeToString(bytes);
+			generatedPassword = Base64.encodeBase64String(bytes);
 		} 
 		catch (NoSuchAlgorithmException e) 
 		{
@@ -844,7 +864,7 @@ public class HelpingsDatabase
 		SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
 		byte[] salt = new byte[16];
 		sr.nextBytes(salt);
-		return Base64.getEncoder().encodeToString(salt);
+		return Base64.encodeBase64String(salt);
 	}
 
 }

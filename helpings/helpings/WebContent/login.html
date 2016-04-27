@@ -11,22 +11,9 @@
 	window.onload = function() {
 
 		var token = getCookie("token");
-		if (token != undefined && token != "") {
+		var guest = getCookie("guest");
+		if (token != undefined && token != "" && guest != "true" ) {
 			window.location = "/feed";
-		}
-		var username = getCookie("username");
-		if (username != undefined && username != "") {
-			gLogin = true;
-		}
-		var type = getCookie("type");
-		if (type != null) {
-			if (type === 'login') {
-				userLogin();
-			} else {
-				userSignup();
-			}
-		} else {
-			userSignup();
 		}
 	};
 	

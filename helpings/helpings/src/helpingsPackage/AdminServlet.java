@@ -37,8 +37,8 @@ public class AdminServlet extends EstiplateServlet {
 			HttpServletResponse response)
 					throws ServletException, IOException {
 
-		if ( !verifyUserToken(request, response, true) ) {
-			response.sendError(403);
+		if ( verifyUserToken(request, response, true, false) != null ) {
+			response.sendError(HttpServletResponse.SC_FORBIDDEN);
 			return;
 		}
 
@@ -67,8 +67,8 @@ public class AdminServlet extends EstiplateServlet {
 
 		action = requestJSON.optString("action");
 
-		if ( !verifyUserToken(request, response, true) ) {
-			response.sendError(403);
+		if ( verifyUserToken(request, response, true, false) != null) {
+			response.sendError(HttpServletResponse.SC_FORBIDDEN);
 			return;
 		}
 

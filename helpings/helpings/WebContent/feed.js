@@ -4,31 +4,34 @@ var gToken = "";
 
 window.onload = function() {
 
+	document.getElementById('postbutton').onclick = function() {
+		document.getElementById('uploadinput').click();
+	};
 	checkLoginStatus();
 	sendFeedRequest();
 }
 
 function checkLoginStatus(){
 
-	gToken = getCookie("token");
-	if ( gToken == undefined || gToken.length == 0) {
-		document.getElementById("postbutton").innerHTML = "Sign Up";
-		document.getElementById("postbutton").href = "/login.html";
+	var guest = getCookie("guest");
+	var token = getCookie("token");
+
+	if ( guest == "true" || token == undefined || token == "" ) {
+		document.getElementById("signup").style.display = "";
 		document.getElementById("logout").style.display = "none";
-		document.getElementById('postbutton').onclick = function() {
-			document.getElementById('postbutton').click();
-		};
 	} else {
+		document.getElementById("signup").style.display = "none";
+		document.getElementById("logout").style.display = "";
+
 		gUsername = getCookie("username");
 		document.getElementById("username").innerHTML = gUsername;
-		document.getElementById('postbutton').onclick = function() {
-			document.getElementById('uploadinput').click();
-		};
 	}
 }
 
 function logout() {
 	setCookie("token", "");
+	setCookie("username", "");
+	setCookie("guest", "");
 	window.location = "/";
 }
 
@@ -241,11 +244,6 @@ function handleFeedResponse() {
 
 function sendGuess(input) {
 
-	if ( gToken == undefined || gToken.length == 0) {
-		alert("Please create an account to guess!");
-		return;
-	}
-
 	gInput = input;
 	console.log(input);
 	var calories = input["calories"].value;
@@ -346,6 +344,14 @@ function handleCommentResponse() {
 
 	if (xmlhttp.readyState == 4) {
 
+		if ( xmlhttp.status == 403 ) {
+			alert("Please create an account to comment");
+			return;
+		}
+		if ( xmlhttp.status == 403 ) {
+			alert("Authentication failed. Please log in again to comment.");
+			return;
+		}
 		var jsonResp;
 		try {
 			jsonResp = JSON.parse(xmlhttp.responseText);
@@ -417,6 +423,10 @@ function handleDeleteResponse() {
 	
 	if (xmlhttp.readyState == 4) {
 
+		if ( xmlhttp.status == 403 ) {
+			alert("Authentication failed. Please log in again.");
+			return;
+		}
 		var jsonResp;
 		try {
 			jsonResp = JSON.parse(xmlhttp.responseText);
@@ -663,6 +673,14 @@ function dataURItoBlob(dataURI) {
 
 function handlePostResponse(){
 	if (xmlhttp.readyState == 4) {
+		if ( xmlhttp.status == 403 ) {
+			alert("Please create an account to post.");
+			return;
+		}
+		if ( xmlhttp.status == 403 ) {
+			alert("Authentication failed. Please log in again.");
+			return;
+		}
 		location.reload();
 	}
 }

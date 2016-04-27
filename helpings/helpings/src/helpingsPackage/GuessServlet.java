@@ -33,19 +33,18 @@ public class GuessServlet extends EstiplateServlet {
 			HttpServletResponse response)
 					throws ServletException, IOException {
 
-		if ( !verifyUserToken(request, response, false) ) {
+		String username = verifyUserToken(request,response, false, true);
+		if ( username == null ) {
 			return;
 		}
-
+		
 		BufferedReader reader = request.getReader();
 		String line = reader.readLine();
 		JSONObject requestJSON = null;
 		long post = 0;
 		int guess = 0;
-		String username = "";
 		try {
 			requestJSON = new JSONObject(line);
-			username = (String) requestJSON.optString("username");
 			post = requestJSON.optLong("post");
 			guess = requestJSON.optInt("calories");			
 		} catch ( Exception e ) {}
